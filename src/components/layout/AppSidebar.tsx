@@ -7,7 +7,8 @@ import {
   Settings,
   Home,
   UserCheck,
-  Building2
+  Building2,
+  CalendarCheck
 } from "lucide-react";
 
 import {
@@ -26,6 +27,7 @@ const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Pessoas", url: "/pessoas", icon: Users },
   { title: "Atendimentos", url: "/tickets", icon: Ticket },
+  { title: "Atendimentos do Deputado", url: "/atendimentos-deputado", icon: CalendarCheck },
   { title: "Agenda", url: "/agenda", icon: Calendar },
 ];
 

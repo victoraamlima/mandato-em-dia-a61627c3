@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import PessoaForm from "./pages/PessoaForm";
 import TicketForm from "./pages/TicketForm";
+import AtendimentosDeputado from "./pages/AtendimentosDeputado";
+import AtendimentoDeputadoNovo from "./pages/AtendimentoDeputadoNovo";
 import { SessionContextProvider, useSession } from "@/components/auth/SessionContextProvider";
 
 const queryClient = new QueryClient();
@@ -89,6 +91,26 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <TicketForm />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/atendimentos-deputado"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <AtendimentosDeputado />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/atendimentos-deputado/novo"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <AtendimentoDeputadoNovo />
                   </AppLayout>
                 </ProtectedRoute>
               }
