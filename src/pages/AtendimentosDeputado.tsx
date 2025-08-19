@@ -23,6 +23,23 @@ type Atendimento = {
   updated_at: string;
 };
 
+function isAtendimentoArray(data: any): data is Atendimento[] {
+  return (
+    Array.isArray(data) &&
+    data.every(
+      (item) =>
+        item &&
+        typeof item === "object" &&
+        "evento_id" in item &&
+        "titulo" in item &&
+        "inicio" in item &&
+        "fim" in item &&
+        "local" in item &&
+        "status" in item
+    )
+  );
+}
+
 function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; search: string; statusFilter: string }) {
   // Datas de referência
   const now = new Date();
@@ -34,9 +51,9 @@ function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; s
   return useQuery({
     queryKey: ["atendimentos-deputado", tab, search, statusFilter],
     queryFn: async () => {
-      // Use two type arguments to bypass type errors for the view
+      // Use only one generic to disable type inference and avoid recursion
       let query = supabase
-        .from<any, Atendimento>("vw_atendimentos_deputado")
+        .from<any>("vw_atendimentos_deputado")
         .select("*")
         .order("inicio", { ascending: tab !== "realizados" });
 
@@ -46,7 +63,8 @@ function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; s
       } else if (tab === "semana") {
         query = query.gte("inicio", weekStart).lte("fim", weekEnd);
       } else if (tab === "proximos") {
-        query = query.eq("status", "Agendado").gt("inicio", weekEnd);
+        query = query.eq("status", "Agendado");
+        query = query.gt("inicio", weekEnd);
       } else if (tab === "realizados") {
         query = query.eq("status", "Realizado").lt("fim", todayStart);
       }
@@ -68,7 +86,7 @@ function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; s
       const { data, error } = await query;
       if (error) throw error;
       // Ensure we only return an array of Atendimento
-      return Array.isArray(data) ? (data as Atendimento[]) : [];
+      return isAtendimentoArray(data) ? (data as Atendimento[]) : [];
     },
   });
 }
