@@ -2,29 +2,26 @@ import { useQuery } from "@tanstack/react-query";
 import { StatCard } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatusBadge, PriorityBadge } from "@/components/ui/status-badge";
 import {
   Users,
   Ticket,
   Clock,
   TrendingUp,
-  Calendar,
-  MapPin,
   Plus,
-  Eye,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-// FIX: Implement the hook to return the expected stats
+// Hook para buscar estatísticas do dashboard
 function useDashboardStats() {
   // Tickets abertos
   const ticketsAbertos = useQuery({
     queryKey: ["dashboard", "ticketsAbertos"],
     queryFn: async () => {
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from("ticket")
-        .select("*", { count: "exact", head: true })
+        .select("ticket_id", { count: "exact", head: true })
         .eq("status", "Aberto");
+      if (error) throw error;
       return count ?? 0;
     },
     initialData: 0,
@@ -34,40 +31,27 @@ function useDashboardStats() {
   const pessoasCount = useQuery({
     queryKey: ["dashboard", "pessoasCount"],
     queryFn: async () => {
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from("pessoa")
-        .select("*", { count: "exact", head: true });
+        .select("cidadao_id", { count: "exact", head: true });
+      if (error) throw error;
       return count ?? 0;
     },
     initialData: 0,
   });
 
-  // Tempo médio (dummy, implement as needed)
+  // Tempo médio (dummy, implementar depois)
   const tempoMedio = useQuery({
     queryKey: ["dashboard", "tempoMedio"],
     queryFn: async () => 0,
     initialData: 0,
   });
 
-  // Taxa de resolução (dummy, implement as needed)
+  // Taxa de resolução (dummy, implementar depois)
   const taxaResolucao = useQuery({
     queryKey: ["dashboard", "taxaResolucao"],
     queryFn: async () => 0,
     initialData: 0,
-  });
-
-  // Tickets recentes (dummy, implement as needed)
-  const ticketsRecentes = useQuery({
-    queryKey: ["dashboard", "ticketsRecentes"],
-    queryFn: async () => [],
-    initialData: [],
-  });
-
-  // Próximos eventos (dummy, implement as needed)
-  const proximosEventos = useQuery({
-    queryKey: ["dashboard", "proximosEventos"],
-    queryFn: async () => [],
-    initialData: [],
   });
 
   return {
@@ -75,8 +59,6 @@ function useDashboardStats() {
     pessoasCount,
     tempoMedio,
     taxaResolucao,
-    ticketsRecentes,
-    proximosEventos,
   };
 }
 
@@ -86,25 +68,21 @@ export default function Dashboard() {
     pessoasCount,
     tempoMedio,
     taxaResolucao,
-    ticketsRecentes,
-    proximosEventos,
   } = useDashboardStats();
 
   const stats = [
     {
       title: "Tickets Abertos",
-      value: ticketsAbertos.data ?? "-",
+      value: ticketsAbertos.isLoading ? "-" : ticketsAbertos.data,
       description: "Aguardando atendimento",
       icon: Ticket,
-      trend: { value: 0, isPositive: true },
       loading: ticketsAbertos.isLoading,
     },
     {
       title: "Pessoas Cadastradas",
-      value: pessoasCount.data ?? "-",
+      value: pessoasCount.isLoading ? "-" : pessoasCount.data,
       description: "Total no sistema",
       icon: Users,
-      trend: { value: 0, isPositive: true },
       loading: pessoasCount.isLoading,
     },
     {
@@ -117,15 +95,13 @@ export default function Dashboard() {
           : `${tempoMedio.data} dias`,
       description: "Para conclusão",
       icon: Clock,
-      trend: { value: 0, isPositive: true },
       loading: tempoMedio.isLoading,
     },
     {
       title: "Taxa de Resolução",
-      value: taxaResolucao.data ?? "-",
+      value: taxaResolucao.isLoading ? "-" : taxaResolucao.data,
       description: "Tickets concluídos",
       icon: TrendingUp,
-      trend: { value: 0, isPositive: true },
       loading: taxaResolucao.isLoading,
     },
   ];
