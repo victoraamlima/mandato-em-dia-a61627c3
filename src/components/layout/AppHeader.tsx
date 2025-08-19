@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Bell, User, LogOut, Settings } from "lucide-react";
+import { Search, Plus, Bell, User, LogOut, Settings, Users as UsersIcon, Ticket as TicketIcon } from "lucide-react";
 
 type UserInfo = {
   name: string;
@@ -42,11 +42,30 @@ export function AppHeader({ user = MOCK_USER }: { user?: UserInfo }) {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Botão Adicionar */}
-        <Button size="sm" className="bg-primary hover:bg-primary-hover text-primary-foreground">
-          <Plus className="w-4 h-4 mr-2" />
-          Adicionar
-        </Button>
+        {/* Botão Adicionar com Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="bg-primary hover:bg-primary-hover text-primary-foreground">
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>Novo registro</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <a href="/pessoas/nova" className="flex items-center gap-2">
+                <UsersIcon className="w-4 h-4" />
+                Nova Pessoa
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/tickets/novo" className="flex items-center gap-2">
+                <TicketIcon className="w-4 h-4" />
+                Novo Atendimento
+              </a>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Notificações */}
         <Button variant="ghost" size="sm" className="relative">
