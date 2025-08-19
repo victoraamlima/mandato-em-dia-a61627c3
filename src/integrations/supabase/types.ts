@@ -14,7 +14,392 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      colaborador: {
+        Row: {
+          ativo: boolean
+          colaborador_id: string
+          created_at: string
+          email: string | null
+          nome: string
+          observacoes: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          colaborador_id?: string
+          created_at?: string
+          email?: string | null
+          nome: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          colaborador_id?: string
+          created_at?: string
+          email?: string | null
+          nome?: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      evento: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          evento_id: string
+          fim: string
+          inicio: string
+          lat: number | null
+          lng: number | null
+          local: string
+          tipo: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          evento_id?: string
+          fim: string
+          inicio: string
+          lat?: number | null
+          lng?: number | null
+          local: string
+          tipo?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          evento_id?: string
+          fim?: string
+          inicio?: string
+          lat?: number | null
+          lng?: number | null
+          local?: string
+          tipo?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      evento_participante: {
+        Row: {
+          cidadao_id: string
+          evento_id: string
+          externo_contato: string | null
+          externo_nome: string | null
+        }
+        Insert: {
+          cidadao_id: string
+          evento_id: string
+          externo_contato?: string | null
+          externo_nome?: string | null
+        }
+        Update: {
+          cidadao_id?: string
+          evento_id?: string
+          externo_contato?: string | null
+          externo_nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_participante_cidadao_id_fkey"
+            columns: ["cidadao_id"]
+            isOneToOne: false
+            referencedRelation: "pessoa"
+            referencedColumns: ["cidadao_id"]
+          },
+          {
+            foreignKeyName: "evento_participante_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "evento"
+            referencedColumns: ["evento_id"]
+          },
+        ]
+      }
+      pessoa: {
+        Row: {
+          atualizado_por: string | null
+          bairro: string
+          cep: string
+          cidadao_id: string
+          complemento: string | null
+          consentimento_bool: boolean
+          cpf: string
+          created_at: string
+          criado_por: string | null
+          data_consentimento: string
+          dt_nasc: string
+          email: string | null
+          finalidade: string | null
+          ibge: string | null
+          logradouro: string
+          municipio: string
+          municipio_titulo: string | null
+          nome: string
+          numero: string
+          observacoes: string | null
+          origem: string
+          secao: string | null
+          sexo: string
+          tel1: string
+          tel2: string | null
+          titulo_eleitor: string | null
+          uf: string
+          uf_titulo: string | null
+          updated_at: string
+          zona: string | null
+        }
+        Insert: {
+          atualizado_por?: string | null
+          bairro: string
+          cep: string
+          cidadao_id?: string
+          complemento?: string | null
+          consentimento_bool: boolean
+          cpf: string
+          created_at?: string
+          criado_por?: string | null
+          data_consentimento?: string
+          dt_nasc: string
+          email?: string | null
+          finalidade?: string | null
+          ibge?: string | null
+          logradouro: string
+          municipio: string
+          municipio_titulo?: string | null
+          nome: string
+          numero: string
+          observacoes?: string | null
+          origem?: string
+          secao?: string | null
+          sexo: string
+          tel1: string
+          tel2?: string | null
+          titulo_eleitor?: string | null
+          uf: string
+          uf_titulo?: string | null
+          updated_at?: string
+          zona?: string | null
+        }
+        Update: {
+          atualizado_por?: string | null
+          bairro?: string
+          cep?: string
+          cidadao_id?: string
+          complemento?: string | null
+          consentimento_bool?: boolean
+          cpf?: string
+          created_at?: string
+          criado_por?: string | null
+          data_consentimento?: string
+          dt_nasc?: string
+          email?: string | null
+          finalidade?: string | null
+          ibge?: string | null
+          logradouro?: string
+          municipio?: string
+          municipio_titulo?: string | null
+          nome?: string
+          numero?: string
+          observacoes?: string | null
+          origem?: string
+          secao?: string | null
+          sexo?: string
+          tel1?: string
+          tel2?: string | null
+          titulo_eleitor?: string | null
+          uf?: string
+          uf_titulo?: string | null
+          updated_at?: string
+          zona?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pessoa_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
+          },
+          {
+            foreignKeyName: "pessoa_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
+          },
+        ]
+      }
+      ticket: {
+        Row: {
+          atendente_id: string | null
+          cadastrado_por: string
+          categoria: string
+          cidadao_id: string
+          colaborador_id: string | null
+          created_at: string
+          data_fechamento: string | null
+          descricao: string | null
+          descricao_curta: string
+          motivo_atendimento: string
+          origem: string
+          prazo_sla: string | null
+          prioridade: string
+          status: string
+          subcategoria: string | null
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          atendente_id?: string | null
+          cadastrado_por: string
+          categoria: string
+          cidadao_id: string
+          colaborador_id?: string | null
+          created_at?: string
+          data_fechamento?: string | null
+          descricao?: string | null
+          descricao_curta: string
+          motivo_atendimento: string
+          origem?: string
+          prazo_sla?: string | null
+          prioridade?: string
+          status?: string
+          subcategoria?: string | null
+          ticket_id?: string
+          updated_at?: string
+        }
+        Update: {
+          atendente_id?: string | null
+          cadastrado_por?: string
+          categoria?: string
+          cidadao_id?: string
+          colaborador_id?: string | null
+          created_at?: string
+          data_fechamento?: string | null
+          descricao?: string | null
+          descricao_curta?: string
+          motivo_atendimento?: string
+          origem?: string
+          prazo_sla?: string | null
+          prioridade?: string
+          status?: string
+          subcategoria?: string | null
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_atendente_id_fkey"
+            columns: ["atendente_id"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
+          },
+          {
+            foreignKeyName: "ticket_cadastrado_por_fkey"
+            columns: ["cadastrado_por"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
+          },
+          {
+            foreignKeyName: "ticket_cidadao_id_fkey"
+            columns: ["cidadao_id"]
+            isOneToOne: false
+            referencedRelation: "pessoa"
+            referencedColumns: ["cidadao_id"]
+          },
+          {
+            foreignKeyName: "ticket_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaborador"
+            referencedColumns: ["colaborador_id"]
+          },
+        ]
+      }
+      ticket_comentario: {
+        Row: {
+          comentario_id: string
+          created_at: string
+          texto: string
+          ticket_id: string
+          usuario_id: string
+        }
+        Insert: {
+          comentario_id?: string
+          created_at?: string
+          texto: string
+          ticket_id: string
+          usuario_id: string
+        }
+        Update: {
+          comentario_id?: string
+          created_at?: string
+          texto?: string
+          ticket_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_comentario_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "ticket"
+            referencedColumns: ["ticket_id"]
+          },
+          {
+            foreignKeyName: "ticket_comentario_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
+          },
+        ]
+      }
+      usuario: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          email: string
+          nome: string
+          perfil: string
+          ultimo_login: string | null
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          email: string
+          nome: string
+          perfil: string
+          ultimo_login?: string | null
+          updated_at?: string
+          usuario_id?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          email?: string
+          nome?: string
+          perfil?: string
+          ultimo_login?: string | null
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
