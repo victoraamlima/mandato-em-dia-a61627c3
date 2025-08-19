@@ -147,7 +147,43 @@ export default function Dashboard() {
           </a>
         </Button>
       </div>
-      {/* ...restante igual */}
+
+      {/* Estatísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.title}
+            title={stat.title}
+            value={stat.value}
+            description={stat.description}
+            icon={stat.icon}
+          />
+        ))}
+      </div>
+
+      {/* Tickets Recentes (placeholder) */}
+      <Card className="card-institutional">
+        <CardHeader>
+          <CardTitle>Tickets Recentes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-muted-foreground text-center py-8">
+            Em breve: listagem dos tickets mais recentes.
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Próximos Eventos (placeholder) */}
+      <Card className="card-institutional">
+        <CardHeader>
+          <CardTitle>Próximos Eventos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-muted-foreground text-center py-8">
+            Em breve: próximos eventos do gabinete.
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
