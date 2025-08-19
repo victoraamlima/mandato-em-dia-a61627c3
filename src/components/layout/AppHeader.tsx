@@ -12,7 +12,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Search, Plus, Bell, User, LogOut, Settings } from "lucide-react";
 
-export function AppHeader() {
+type UserInfo = {
+  name: string;
+  email: string;
+  role: string;
+  avatarUrl?: string;
+};
+
+const MOCK_USER: UserInfo = {
+  name: "João Silva",
+  email: "joao.silva@gabinete.gov.br",
+  role: "Atendente",
+};
+
+export function AppHeader({ user = MOCK_USER }: { user?: UserInfo }) {
   return (
     <header className="border-b border-border bg-surface h-16 flex items-center justify-between px-6">
       <div className="flex items-center gap-4">
@@ -46,7 +59,7 @@ export function AppHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="" alt="Usuario" />
+                <AvatarImage src={user.avatarUrl || ""} alt={user.name} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   <User className="w-4 h-4" />
                 </AvatarFallback>
@@ -56,12 +69,12 @@ export function AppHeader() {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">João Silva</p>
+                <p className="text-sm font-medium leading-none">{user.name}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  joao.silva@gabinete.gov.br
+                  {user.email}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground font-medium">
-                  Atendente
+                  {user.role}
                 </p>
               </div>
             </DropdownMenuLabel>
