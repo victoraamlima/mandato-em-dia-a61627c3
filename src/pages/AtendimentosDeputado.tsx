@@ -51,9 +51,8 @@ function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; s
   return useQuery({
     queryKey: ["atendimentos-deputado", tab, search, statusFilter],
     queryFn: async () => {
-      // Use only one generic to disable type inference and avoid recursion
       let query = supabase
-        .from<any>("vw_atendimentos_deputado")
+        .from<any, Atendimento>("vw_atendimentos_deputado")
         .select("*")
         .order("inicio", { ascending: tab !== "realizados" });
 
@@ -63,20 +62,21 @@ function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; s
       } else if (tab === "semana") {
         query = query.gte("inicio", weekStart).lte("fim", weekEnd);
       } else if (tab === "proximos") {
-        query = query.eq("status", "Agendado");
-        query = query.gt("inicio", weekEnd);
+        // Fix: cast to any before chaining to avoid deep type instantiation
+        query = (query as any).eq("status", "Agendado");
+        query = (query as any).gt("inicio", weekEnd);
       } else if (tab === "realizados") {
-        query = query.eq("status", "Realizado").lt("fim", todayStart);
+        query = (query as any).eq("status", "Realizado").lt("fim", todayStart);
       }
 
       // Filtro de status
       if (statusFilter) {
-        query = query.eq("status", statusFilter);
+        query = (query as any).eq("status", statusFilter);
       }
 
       // Busca textual
       if (search) {
-        query = query.or([
+        query = (query as any).or([
           `titulo.ilike.%${search}%`,
           `descricao.ilike.%${search}%`,
           `local.ilike.%${search}%`
@@ -85,7 +85,6 @@ function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; s
 
       const { data, error } = await query;
       if (error) throw error;
-      // Ensure we only return an array of Atendimento
       return isAtendimentoArray(data) ? (data as Atendimento[]) : [];
     },
   });
