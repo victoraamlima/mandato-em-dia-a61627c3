@@ -67,7 +67,8 @@ function useAtendimentosDeputado({ tab, search, statusFilter }: { tab: string; s
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data ?? []) as Atendimento[];
+      // Ensure we only return an array of Atendimento
+      return Array.isArray(data) ? (data as Atendimento[]) : [];
     },
   });
 }
