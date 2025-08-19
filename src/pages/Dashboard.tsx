@@ -8,8 +8,26 @@ import {
   Clock,
   TrendingUp,
   Plus,
+  Eye,
+  MoreHorizontal,
+  Edit,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Hook para buscar estatísticas do dashboard
 function useDashboardStats() {
@@ -62,6 +80,24 @@ function useDashboardStats() {
   };
 }
 
+// Hook para buscar os tickets mais recentes
+function useRecentTickets() {
+  return useQuery({
+    queryKey: ["dashboard", "recentTickets"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ticket")
+        .select(
+          "ticket_id, motivo_atendimento, categoria, prioridade, status, descricao_curta, created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export default function Dashboard() {
   const {
     ticketsAbertos,
@@ -69,6 +105,12 @@ export default function Dashboard() {
     tempoMedio,
     taxaResolucao,
   } = useDashboardStats();
+
+  const {
+    data: recentTickets,
+    isLoading: loadingRecent,
+    isError: errorRecent,
+  } = useRecentTickets();
 
   const stats = [
     {
@@ -137,15 +179,106 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Tickets Recentes (placeholder) */}
+      {/* Tickets Recentes */}
       <Card className="card-institutional">
         <CardHeader>
           <CardTitle>Tickets Recentes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-muted-foreground text-center py-8">
-            Em breve: listagem dos tickets mais recentes.
-          </div>
+          {loadingRecent ? (
+            <div className="text-muted-foreground text-center py-8">
+              Carregando...
+            </div>
+          ) : errorRecent ? (
+            <div className="text-destructive text-center py-8">
+              Erro ao carregar tickets recentes.
+            </div>
+          ) : recentTickets.length === 0 ? (
+            <div className="text-muted-foreground text-center py-8">
+              Nenhum ticket recente encontrado.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Motivo</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Prioridade</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Criado em</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentTickets.map((ticket: any) => (
+                    <TableRow key={ticket.ticket_id}>
+                      <TableCell>{ticket.motivo_atendimento}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {ticket.categoria}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            ticket.prioridade === "Alta"
+                              ? "priority-alta"
+                              : ticket.prioridade === "Media"
+                              ? "priority-media"
+                              : "priority-baixa"
+                          }
+                        >
+                          {ticket.prioridade}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            ticket.status === "Aberto"
+                              ? "status-aberto"
+                              : ticket.status === "Fechado"
+                              ? "status-concluido"
+                              : "status-em-andamento"
+                          }
+                        >
+                          {ticket.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{ticket.descricao_curta}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(ticket.created_at).toLocaleDateString("pt-BR")}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <a href={`/tickets/${ticket.ticket_id}`}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Visualizar
+                              </a>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <a href={`/tickets/${ticket.ticket_id}/editar`}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </a>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
