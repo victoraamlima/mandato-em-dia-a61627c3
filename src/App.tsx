@@ -9,6 +9,8 @@ import Pessoas from "./pages/Pessoas";
 import Tickets from "./pages/Tickets";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import PessoaForm from "./pages/PessoaForm";
+import TicketForm from "./pages/TicketForm";
 import { SessionContextProvider, useSession } from "@/components/auth/SessionContextProvider";
 
 const queryClient = new QueryClient();
@@ -62,11 +64,31 @@ const App = () => (
               }
             />
             <Route
+              path="/pessoas/nova"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <PessoaForm />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/tickets"
               element={
                 <ProtectedRoute>
                   <AppLayout>
                     <Tickets />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tickets/novo"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TicketForm />
                   </AppLayout>
                 </ProtectedRoute>
               }
