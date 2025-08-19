@@ -1,41 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Sistema de Design - Gabinete Digital
+   Cores, gradientes, tipografia e tokens semânticos
+   Todas as cores em HSL para máxima flexibilidade
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Cores Base - Neutros */
+    --background: 0 0% 99%;
+    --foreground: 210 11% 15%;
+    
+    /* Superfícies */
+    --surface: 0 0% 100%;
+    --surface-hover: 210 20% 98%;
+    --surface-pressed: 210 20% 96%;
+    
+    /* Cartões e Elevação */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 210 11% 15%;
+    --card-shadow: 210 40% 8%;
+    
+    /* Popover e Modais */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
+    --popover-foreground: 210 11% 15%;
+    
+    /* Institucional Azul - Cor Primária */
+    --primary: 217 91% 35%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 91% 32%;
+    --primary-pressed: 217 91% 28%;
+    --primary-light: 217 91% 95%;
+    
+    /* Secundário - Cinza Azulado */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 210 11% 15%;
+    --secondary-hover: 210 20% 92%;
+    
+    /* Estados de Sucesso */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 142 76% 95%;
+    
+    /* Estados de Alerta */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 92% 95%;
+    
+    /* Estados de Erro */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-light: 0 84% 95%;
+    
+    /* Informação */
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    --info-light: 199 89% 95%;
+    
+    /* Muted e Textos Secundários */
+    --muted: 210 20% 96%;
+    --muted-foreground: 210 11% 46%;
+    
+    /* Accent e Realce */
+    --accent: 210 20% 96%;
+    --accent-foreground: 210 11% 15%;
+    
+    /* Bordas e Inputs */
+    --border: 210 20% 89%;
+    --border-hover: 210 20% 82%;
+    --input: 210 20% 89%;
+    --input-focus: 217 91% 35%;
+    --ring: 217 91% 35%;
+    
+    /* Gradientes Institucionais */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 35%), hsl(217 91% 42%));
+    --gradient-secondary: linear-gradient(135deg, hsl(210 20% 96%), hsl(210 20% 99%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 20% 98%));
+    
+    /* Sombras Elegantes */
+    --shadow-sm: 0 2px 4px hsl(210 40% 8% / 0.06);
+    --shadow: 0 4px 12px hsl(210 40% 8% / 0.08);
+    --shadow-lg: 0 8px 24px hsl(210 40% 8% / 0.12);
+    --shadow-institutional: 0 4px 20px hsl(217 91% 35% / 0.15);
+    
+    /* Transições Suaves */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
@@ -100,6 +155,114 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter antialiased;
+  }
+}
+
+@layer components {
+  /* Componentes Institucionais */
+  .card-institutional {
+    @apply bg-card border border-border rounded-lg shadow-sm;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow);
+  }
+  
+  .card-institutional:hover {
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-smooth);
+  }
+  
+  .btn-institutional {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium;
+    @apply transition-all duration-200 focus-visible:outline-none focus-visible:ring-2;
+    @apply focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-institutional);
+  }
+  
+  .btn-institutional:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-institutional), var(--shadow-lg);
+  }
+  
+  .status-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    transition: var(--transition-smooth);
+  }
+  
+  .status-aberto {
+    @apply bg-info-light text-info-foreground;
+    background-color: hsl(var(--info-light));
+    color: hsl(var(--info));
+  }
+  
+  .status-em-andamento {
+    @apply bg-warning-light text-warning-foreground;
+    background-color: hsl(var(--warning-light));
+    color: hsl(var(--warning));
+  }
+  
+  .status-concluido {
+    @apply bg-success-light text-success-foreground;
+    background-color: hsl(var(--success-light));
+    color: hsl(var(--success));
+  }
+  
+  .priority-alta {
+    @apply bg-destructive-light text-destructive;
+    background-color: hsl(var(--destructive-light));
+    color: hsl(var(--destructive));
+  }
+  
+  .priority-media {
+    @apply bg-warning-light text-warning;
+    background-color: hsl(var(--warning-light));
+    color: hsl(var(--warning));
+  }
+  
+  .priority-baixa {
+    @apply bg-success-light text-success;
+    background-color: hsl(var(--success-light));
+    color: hsl(var(--success));
+  }
+  
+  /* Animações e Microinterações */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift {
+    transition: var(--transition-smooth);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
