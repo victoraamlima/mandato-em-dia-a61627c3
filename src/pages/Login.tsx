@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/components/auth/SessionContextProvider";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { pt } from "@supabase/auth-ui-shared/locales";
+import { pt } from "@/lib/supabase-pt";
 
 export default function Login() {
   const { session, isLoading } = useSession();

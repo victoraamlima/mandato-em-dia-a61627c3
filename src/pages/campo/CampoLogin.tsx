@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { CampoLayout } from "@/components/layout/CampoLayout";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { pt } from "@supabase/auth-ui-shared/locales";
+import { pt } from "@/lib/supabase-pt";
 
 export default function CampoLogin() {
   const { session, isLoading } = useSession();
