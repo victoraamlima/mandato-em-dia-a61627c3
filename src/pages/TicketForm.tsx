@@ -19,11 +19,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 const schema = z.object({
   motivo_atendimento: z.string().min(3, "Motivo obrigatório"),
   categoria: z.string().min(1, "Categoria obrigatória"),
+  subcategoria: z.string().optional().nullable(),
   prioridade: z.string().default("Media"),
   status: z.string().default("Aberto"),
   descricao_curta: z.string().min(3, "Descrição curta obrigatória"),
-  descricao: z.string().optional(),
+  descricao: z.string().optional().nullable(),
   cidadao_id: z.string().uuid("ID do cidadão inválido"),
+  atendente_id: z.string().uuid().optional().nullable(),
+  colaborador_id: z.string().uuid().optional().nullable(),
+  prazo_sla: z.string().optional().nullable(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -49,34 +53,68 @@ export default function TicketForm() {
     enabled: isEditing,
   });
 
+  const { data: usuarios } = useQuery({
+    queryKey: ["usuarios"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("usuario").select("usuario_id, nome").order("nome");
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: colaboradores } = useQuery({
+    queryKey: ["colaboradores"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("colaborador").select("colaborador_id, nome").order("nome");
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       motivo_atendimento: "", categoria: "", prioridade: "Media", status: "Aberto",
       descricao_curta: "", descricao: "", cidadao_id: cidadao_id_param || undefined,
+      subcategoria: null, atendente_id: null, colaborador_id: null, prazo_sla: null,
     },
   });
 
   useEffect(() => {
-    if (existingTicket) form.reset(existingTicket);
+    if (existingTicket) {
+      form.reset({
+        ...existingTicket,
+        prazo_sla: existingTicket.prazo_sla ? existingTicket.prazo_sla.split('T')[0] : null,
+      });
+    }
   }, [existingTicket, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (!user) throw new Error("Usuário não autenticado.");
+
       if (isEditing) {
-        const ticketUpdate: TablesUpdate<"ticket"> = data;
+        const ticketUpdate: TablesUpdate<"ticket"> = {
+          ...data,
+          atendente_id: data.atendente_id || null,
+          colaborador_id: data.colaborador_id || null,
+          prazo_sla: data.prazo_sla || null,
+        };
         const { error } = await supabase.from("ticket").update(ticketUpdate).eq("ticket_id", id);
         if (error) throw error;
       } else {
         const ticketInsert: TablesInsert<"ticket"> = {
           motivo_atendimento: data.motivo_atendimento,
           categoria: data.categoria,
+          subcategoria: data.subcategoria,
           prioridade: data.prioridade,
           status: data.status,
           descricao_curta: data.descricao_curta,
           descricao: data.descricao,
           cidadao_id: data.cidadao_id,
+          atendente_id: data.atendente_id || null,
+          colaborador_id: data.colaborador_id || null,
+          prazo_sla: data.prazo_sla || null,
           cadastrado_por: user.id,
         };
         const { error } = await supabase.from("ticket").insert([ticketInsert]);
@@ -125,16 +163,21 @@ export default function TicketForm() {
             <div className="space-y-2">
               <Label htmlFor="descricao">Descrição Completa (Opcional)</Label>
               <Textarea id="descricao" {...form.register("descricao")} />
-              {form.formState.errors.descricao && <p className="text-sm text-destructive">{form.formState.errors.descricao.message}</p>}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="categoria">Categoria</Label>
                 <Input id="categoria" {...form.register("categoria")} />
                 {form.formState.errors.categoria && <p className="text-sm text-destructive">{form.formState.errors.categoria.message}</p>}
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="subcategoria">Subcategoria (Opcional)</Label>
+                <Input id="subcategoria" {...form.register("subcategoria")} />
+              </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Prioridade</Label>
                 <Controller
@@ -142,9 +185,7 @@ export default function TicketForm() {
                   name="prioridade"
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a prioridade" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Baixa">Baixa</SelectItem>
                         <SelectItem value="Media">Média</SelectItem>
@@ -154,7 +195,6 @@ export default function TicketForm() {
                   )}
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Controller
@@ -162,9 +202,7 @@ export default function TicketForm() {
                   name="status"
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o status" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Aberto">Aberto</SelectItem>
                         <SelectItem value="Em Andamento">Em Andamento</SelectItem>
@@ -174,6 +212,46 @@ export default function TicketForm() {
                   )}
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Atendente Responsável (Opcional)</Label>
+                <Controller
+                  control={form.control}
+                  name="atendente_id"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum</SelectItem>
+                        {usuarios?.map(u => <SelectItem key={u.usuario_id} value={u.usuario_id}>{u.nome}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Colaborador Externo (Opcional)</Label>
+                <Controller
+                  control={form.control}
+                  name="colaborador_id"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum</SelectItem>
+                        {colaboradores?.map(c => <SelectItem key={c.colaborador_id} value={c.colaborador_id}>{c.nome}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="prazo_sla">Prazo SLA (Opcional)</Label>
+              <Input id="prazo_sla" type="date" {...form.register("prazo_sla")} />
             </div>
 
             <Button type="submit" className="w-full" disabled={mutation.isPending || !user}>
