@@ -11,6 +11,7 @@ import {
   Eye,
   MoreHorizontal,
   Edit,
+  Calendar,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -28,10 +29,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 // Hook para buscar estatísticas do dashboard
 function useDashboardStats() {
-  // Tickets abertos
   const ticketsAbertos = useQuery({
     queryKey: ["dashboard", "ticketsAbertos"],
     queryFn: async () => {
@@ -42,10 +44,8 @@ function useDashboardStats() {
       if (error) throw error;
       return count ?? 0;
     },
-    initialData: 0,
   });
 
-  // Pessoas cadastradas
   const pessoasCount = useQuery({
     queryKey: ["dashboard", "pessoasCount"],
     queryFn: async () => {
@@ -55,21 +55,24 @@ function useDashboardStats() {
       if (error) throw error;
       return count ?? 0;
     },
-    initialData: 0,
   });
 
-  // Tempo médio (dummy, implementar depois)
   const tempoMedio = useQuery({
     queryKey: ["dashboard", "tempoMedio"],
-    queryFn: async () => 0,
-    initialData: 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('calcular_tempo_medio_resolucao');
+      if (error) throw error;
+      return data;
+    },
   });
 
-  // Taxa de resolução (dummy, implementar depois)
   const taxaResolucao = useQuery({
     queryKey: ["dashboard", "taxaResolucao"],
-    queryFn: async () => 0,
-    initialData: 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('calcular_taxa_resolucao');
+      if (error) throw error;
+      return data;
+    },
   });
 
   return {
@@ -98,6 +101,23 @@ function useRecentTickets() {
   });
 }
 
+// Hook para buscar os próximos eventos
+function useUpcomingEvents() {
+    return useQuery({
+      queryKey: ["dashboard", "upcomingEvents"],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("evento")
+          .select("evento_id, titulo, local, inicio")
+          .gt("inicio", new Date().toISOString())
+          .order("inicio", { ascending: true })
+          .limit(5);
+        if (error) throw error;
+        return data ?? [];
+      },
+    });
+  }
+
 export default function Dashboard() {
   const {
     ticketsAbertos,
@@ -112,39 +132,36 @@ export default function Dashboard() {
     isError: errorRecent,
   } = useRecentTickets();
 
+  const {
+    data: upcomingEvents,
+    isLoading: loadingEvents,
+    isError: errorEvents,
+  } = useUpcomingEvents();
+
   const stats = [
     {
       title: "Tickets Abertos",
       value: ticketsAbertos.isLoading ? "-" : ticketsAbertos.data,
       description: "Aguardando atendimento",
       icon: Ticket,
-      loading: ticketsAbertos.isLoading,
     },
     {
       title: "Pessoas Cadastradas",
       value: pessoasCount.isLoading ? "-" : pessoasCount.data,
       description: "Total no sistema",
       icon: Users,
-      loading: pessoasCount.isLoading,
     },
     {
       title: "Tempo Médio",
-      value:
-        tempoMedio.isLoading
-          ? "-"
-          : tempoMedio.data === 0
-          ? "0"
-          : `${tempoMedio.data} dias`,
-      description: "Para conclusão",
+      value: tempoMedio.isLoading ? "-" : `${(tempoMedio.data || 0).toFixed(1)} dias`,
+      description: "Para conclusão de tickets",
       icon: Clock,
-      loading: tempoMedio.isLoading,
     },
     {
       title: "Taxa de Resolução",
-      value: taxaResolucao.isLoading ? "-" : taxaResolucao.data,
+      value: taxaResolucao.isLoading ? "-" : `${(taxaResolucao.data || 0).toFixed(1)}%`,
       description: "Tickets concluídos",
       icon: TrendingUp,
-      loading: taxaResolucao.isLoading,
     },
   ];
 
@@ -167,132 +184,110 @@ export default function Dashboard() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <StatCard
             key={stat.title}
             title={stat.title}
-            value={stat.value}
+            value={stat.value?.toString() || "-"}
             description={stat.description}
             icon={stat.icon}
           />
         ))}
       </div>
 
-      {/* Tickets Recentes */}
-      <Card className="card-institutional">
-        <CardHeader>
-          <CardTitle>Tickets Recentes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loadingRecent ? (
-            <div className="text-muted-foreground text-center py-8">
-              Carregando...
-            </div>
-          ) : errorRecent ? (
-            <div className="text-destructive text-center py-8">
-              Erro ao carregar tickets recentes.
-            </div>
-          ) : recentTickets.length === 0 ? (
-            <div className="text-muted-foreground text-center py-8">
-              Nenhum ticket recente encontrado.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Motivo</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Prioridade</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Criado em</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentTickets.map((ticket: any) => (
-                    <TableRow key={ticket.ticket_id}>
-                      <TableCell>{ticket.motivo_atendimento}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-xs">
-                          {ticket.categoria}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            ticket.prioridade === "Alta"
-                              ? "priority-alta"
-                              : ticket.prioridade === "Media"
-                              ? "priority-media"
-                              : "priority-baixa"
-                          }
-                        >
-                          {ticket.prioridade}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            ticket.status === "Aberto"
-                              ? "status-aberto"
-                              : ticket.status === "Fechado"
-                              ? "status-concluido"
-                              : "status-em-andamento"
-                          }
-                        >
-                          {ticket.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{ticket.descricao_curta}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(ticket.created_at).toLocaleDateString("pt-BR")}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <a href={`/tickets/${ticket.ticket_id}`}>
-                                <Eye className="w-4 h-4 mr-2" />
-                                Visualizar
-                              </a>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <a href={`/tickets/${ticket.ticket_id}/editar`}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar
-                              </a>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Tickets Recentes */}
+        <Card className="card-institutional lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Tickets Recentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingRecent ? (
+              <div className="text-muted-foreground text-center py-8">Carregando...</div>
+            ) : errorRecent ? (
+              <div className="text-destructive text-center py-8">Erro ao carregar tickets.</div>
+            ) : recentTickets.length === 0 ? (
+              <div className="text-muted-foreground text-center py-8">Nenhum ticket recente.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Motivo</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Prioridade</TableHead>
+                      <TableHead></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {recentTickets.map((ticket: any) => (
+                      <TableRow key={ticket.ticket_id}>
+                        <TableCell className="font-medium">{ticket.motivo_atendimento}</TableCell>
+                        <TableCell>
+                          <Badge className={ticket.status === "Aberto" ? "status-aberto" : ticket.status === "Fechado" ? "status-concluido" : "status-em-andamento"}>
+                            {ticket.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={ticket.prioridade === "Alta" ? "priority-alta" : ticket.prioridade === "Media" ? "priority-media" : "priority-baixa"}>
+                            {ticket.prioridade}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild><a href={`/tickets/${ticket.ticket_id}`}><Eye className="w-4 h-4 mr-2" />Visualizar</a></DropdownMenuItem>
+                              <DropdownMenuItem asChild><a href={`/tickets/${ticket.ticket_id}/editar`}><Edit className="w-4 h-4 mr-2" />Editar</a></DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Próximos Eventos (placeholder) */}
-      <Card className="card-institutional">
-        <CardHeader>
-          <CardTitle>Próximos Eventos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-muted-foreground text-center py-8">
-            Em breve: próximos eventos do gabinete.
-          </div>
-        </CardContent>
-      </Card>
+        {/* Próximos Eventos */}
+        <Card className="card-institutional">
+          <CardHeader>
+            <CardTitle>Próximos Eventos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingEvents ? (
+              <div className="text-muted-foreground text-center py-8">Carregando...</div>
+            ) : errorEvents ? (
+              <div className="text-destructive text-center py-8">Erro ao carregar eventos.</div>
+            ) : upcomingEvents.length === 0 ? (
+              <div className="text-muted-foreground text-center py-8">Nenhum evento futuro.</div>
+            ) : (
+              <ul className="space-y-4">
+                {upcomingEvents.map((event) => (
+                  <li key={event.evento_id} className="flex items-start gap-4">
+                    <div className="flex flex-col items-center justify-center bg-primary-light text-primary rounded-md p-2 font-bold">
+                      <span className="text-xs uppercase">{format(new Date(event.inicio), 'MMM', { locale: ptBR })}</span>
+                      <span className="text-lg">{format(new Date(event.inicio), 'd')}</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{event.titulo}</p>
+                      <p className="text-sm text-muted-foreground">{event.local}</p>
+                      <p className="text-xs text-muted-foreground">{format(new Date(event.inicio), 'HH:mm')}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

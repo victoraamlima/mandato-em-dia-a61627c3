@@ -411,7 +411,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calcular_taxa_resolucao: {
+        Args: {}
+        Returns: number
+      }
+      calcular_tempo_medio_resolucao: {
+        Args: {}
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
