@@ -16,6 +16,10 @@ import AtendimentoDeputadoNovo from "./pages/AtendimentoDeputadoNovo";
 import { SessionContextProvider, useSession } from "@/components/auth/SessionContextProvider";
 import PessoaDetalhes from "./pages/PessoaDetalhes";
 import TicketDetalhes from "./pages/TicketDetalhes";
+import Usuarios from "./pages/Usuarios";
+import UsuarioForm from "./pages/UsuarioForm";
+import Relatorios from "./pages/Relatorios";
+import Configuracoes from "./pages/Configuracoes";
 
 const queryClient = new QueryClient();
 
@@ -173,15 +177,13 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* Rotas de Gestão */}
             <Route
               path="/relatorios"
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div className="p-8 text-center">
-                      <h1 className="text-2xl font-bold">Relatórios</h1>
-                      <p className="text-muted-foreground">Em desenvolvimento</p>
-                    </div>
+                    <Relatorios />
                   </AppLayout>
                 </ProtectedRoute>
               }
@@ -191,10 +193,27 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div className="p-8 text-center">
-                      <h1 className="text-2xl font-bold">Usuários</h1>
-                      <p className="text-muted-foreground">Em desenvolvimento</p>
-                    </div>
+                    <Usuarios />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/usuarios/novo"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <UsuarioForm />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/usuarios/:id/editar"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <UsuarioForm />
                   </AppLayout>
                 </ProtectedRoute>
               }
@@ -204,10 +223,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div className="p-8 text-center">
-                      <h1 className="text-2xl font-bold">Configurações</h1>
-                      <p className="text-muted-foreground">Em desenvolvimento</p>
-                    </div>
+                    <Configuracoes />
                   </AppLayout>
                 </ProtectedRoute>
               }
