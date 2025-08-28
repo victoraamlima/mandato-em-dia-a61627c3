@@ -14,6 +14,8 @@ import TicketForm from "./pages/TicketForm";
 import AtendimentosDeputado from "./pages/AtendimentosDeputado";
 import AtendimentoDeputadoNovo from "./pages/AtendimentoDeputadoNovo";
 import { SessionContextProvider, useSession } from "@/components/auth/SessionContextProvider";
+import PessoaDetalhes from "./pages/PessoaDetalhes";
+import TicketDetalhes from "./pages/TicketDetalhes";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* Rotas de Pessoas */}
             <Route
               path="/pessoas"
               element={
@@ -76,6 +79,27 @@ const App = () => (
               }
             />
             <Route
+              path="/pessoas/:id"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <PessoaDetalhes />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pessoas/:id/editar"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <PessoaForm />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            {/* Rotas de Tickets */}
+            <Route
               path="/tickets"
               element={
                 <ProtectedRoute>
@@ -95,6 +119,27 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+             <Route
+              path="/tickets/:id"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TicketDetalhes />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tickets/:id/editar"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TicketForm />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            {/* Outras Rotas */}
             <Route
               path="/atendimentos-deputado"
               element={
