@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { useSession } from "@/components/auth/SessionContextProvider";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const schema = z.object({
   motivo_atendimento: z.string().min(3, "Motivo obrigatório"),
@@ -68,15 +69,9 @@ export default function TicketForm() {
         const { error } = await supabase.from("ticket").update(ticketUpdate).eq("ticket_id", id);
         if (error) throw error;
       } else {
-        const ticketInsert: TablesInsert<"ticket"> = {
-          motivo_atendimento: data.motivo_atendimento,
-          categoria: data.categoria,
-          prioridade: data.prioridade,
-          status: data.status,
-          descricao_curta: data.descricao_curta,
-          descricao: data.descricao,
-          cidadao_id: data.cidadao_id,
-          cadastrado_por: user.id,
+        const ticketInsert: TablesInsert<"ticket"> = { 
+          ...data, 
+          cadastrado_por: user.id 
         };
         const { error } = await supabase.from("ticket").insert([ticketInsert]);
         if (error) throw error;
@@ -93,13 +88,88 @@ export default function TicketForm() {
     },
   });
 
+  if (isLoading && isEditing) {
+    return <div className="max-w-2xl mx-auto"><Skeleton className="h-96 w-full" /></div>
+  }
+
   return (
-    <div className="max-w-xl mx-auto animate-fade-in">
+    <div className="max-w-2xl mx-auto animate-fade-in">
       <Card className="card-institutional">
         <CardHeader><CardTitle>{isEditing ? "Editar Atendimento" : "Novo Atendimento"}</CardTitle></CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={form.handleSubmit((data) => mutation.mutate(data))}>
-            {/* Campos do formulário */}
+          <form className="space-y-6" onSubmit={form.handleSubmit((data) => mutation.mutate(data))}>
+            <div className="space-y-2">
+              <Label htmlFor="cidadao_id">Cidadão (ID)</Label>
+              <Input id="cidadao_id" {...form.register("cidadao_id")} disabled />
+              {form.formState.errors.cidadao_id && <p className="text-sm text-destructive">{form.formState.errors.cidadao_id.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="motivo_atendimento">Motivo do Atendimento</Label>
+              <Input id="motivo_atendimento" {...form.register("motivo_atendimento")} />
+              {form.formState.errors.motivo_atendimento && <p className="text-sm text-destructive">{form.formState.errors.motivo_atendimento.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="descricao_curta">Descrição Curta</Label>
+              <Input id="descricao_curta" {...form.register("descricao_curta")} />
+              {form.formState.errors.descricao_curta && <p className="text-sm text-destructive">{form.formState.errors.descricao_curta.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="descricao">Descrição Completa (Opcional)</Label>
+              <Textarea id="descricao" {...form.register("descricao")} />
+              {form.formState.errors.descricao && <p className="text-sm text-destructive">{form.formState.errors.descricao.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="categoria">Categoria</Label>
+                <Input id="categoria" {...form.register("categoria")} />
+                {form.formState.errors.categoria && <p className="text-sm text-destructive">{form.formState.errors.categoria.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Prioridade</Label>
+                <Controller
+                  control={form.control}
+                  name="prioridade"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a prioridade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Baixa">Baixa</SelectItem>
+                        <SelectItem value="Media">Média</SelectItem>
+                        <SelectItem value="Alta">Alta</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Controller
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Aberto">Aberto</SelectItem>
+                        <SelectItem value="Em Andamento">Em Andamento</SelectItem>
+                        <SelectItem value="Fechado">Fechado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+            </div>
+
             <Button type="submit" className="w-full" disabled={mutation.isPending || !user}>
               {mutation.isPending ? "Salvando..." : (isEditing ? "Salvar Alterações" : "Cadastrar Atendimento")}
             </Button>
