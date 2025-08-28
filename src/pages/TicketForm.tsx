@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { useSession } from "@/components/auth/SessionContextProvider";
 import { Label } from "@/components/ui/label";
@@ -228,10 +228,10 @@ export default function TicketForm() {
                   control={form.control}
                   name="atendente_id"
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select onValueChange={(value) => field.onChange(value === "none" ? null : value)} value={field.value || ""}>
                       <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
+                        <SelectItem value="none">Nenhum</SelectItem>
                         {usuarios?.map(u => <SelectItem key={u.usuario_id} value={u.usuario_id}>{u.nome}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -244,10 +244,10 @@ export default function TicketForm() {
                   control={form.control}
                   name="colaborador_id"
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select onValueChange={(value) => field.onChange(value === "none" ? null : value)} value={field.value || ""}>
                       <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
+                        <SelectItem value="none">Nenhum</SelectItem>
                         {colaboradores?.map(c => <SelectItem key={c.colaborador_id} value={c.colaborador_id}>{c.nome}</SelectItem>)}
                       </SelectContent>
                     </Select>

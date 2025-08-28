@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarPlus, Search, Plus } from "lucide-react";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 
