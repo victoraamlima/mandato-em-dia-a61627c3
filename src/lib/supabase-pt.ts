@@ -1,6 +1,4 @@
-import type { Translations } from '@supabase/auth-ui-shared'
-
-export const pt: Translations = {
+export const pt = {
   sign_up: {
     email_label: 'Endereço de e-mail',
     password_label: 'Crie uma senha',

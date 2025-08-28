@@ -1,4 +1,5 @@
 import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/components/auth/SessionContextProvider";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -65,7 +66,9 @@ export default function CampoLogin() {
             localization={{
               variables: pt,
             }}
+            theme="dark"
             appearance={{
+              theme: ThemeSupa,
               variables: {
                 default: {
                   colors: {
@@ -84,7 +87,6 @@ export default function CampoLogin() {
                   }
                 },
               },
-              extend: false,
               className: {
                 button: "bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base",
                 input: "h-12",
