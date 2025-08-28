@@ -75,8 +75,8 @@ export default function CampoLogin() {
                     inputBorderFocus: "#2DD4BF",
                   },
                   radii: {
-                    borderRadius: "0.5rem",
                     buttonBorderRadius: "0.5rem",
+                    inputBorderRadius: "0.5rem",
                   }
                 },
               },

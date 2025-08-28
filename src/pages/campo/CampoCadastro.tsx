@@ -18,9 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import InputMask from "react-input-mask";
+import { TablesInsert } from "@/integrations/supabase/types";
 
 const schema = z.object({
-  cpf: z.string().refine(isValidCPF, "CPF inválido"),
+  cpf: z.string().refine((cpf) => isValidCPF(normalizeCPF(cpf)), "CPF inválido"),
   nome: z.string().min(3, "Nome completo é obrigatório"),
   dt_nasc: z.string().min(1, "Data de nascimento é obrigatória"),
   sexo: z.string().min(1, "Sexo é obrigatório"),
@@ -40,7 +41,7 @@ const schema = z.object({
   municipio_titulo: z.string().optional(),
   uf_titulo: z.string().optional(),
   observacoes: z.string().optional(),
-  consentimento_bool: z.literal(true, { errorMap: () => ({ message: "O consentimento é obrigatório" }) }),
+  consentimento_bool: z.boolean().refine(val => val === true, { message: "O consentimento é obrigatório" }),
   finalidade: z.string().min(3, "A finalidade é obrigatória"),
 });
 
@@ -91,18 +92,41 @@ export default function CampoCadastro() {
     mutationFn: async (data: FormData) => {
       if (!colaborador) throw new Error("Colaborador não identificado.");
 
-      const { data: existing } = await supabase.from("pessoa").select("cidadao_id").eq("cpf", data.cpf).single();
+      const normalizedCpf = normalizeCPF(data.cpf);
+      const { data: existing } = await supabase.from("pessoa").select("cidadao_id").eq("cpf", normalizedCpf).maybeSingle();
       if (existing) throw new Error("Este CPF já foi cadastrado.");
+
+      const payload: TablesInsert<'pessoa'> = {
+        cpf: normalizedCpf,
+        nome: data.nome,
+        dt_nasc: data.dt_nasc,
+        sexo: data.sexo,
+        tel1: data.tel1,
+        tel2: data.tel2 || null,
+        email: data.email || null,
+        cep: data.cep,
+        logradouro: data.logradouro,
+        numero: data.numero,
+        complemento: data.complemento || null,
+        bairro: data.bairro,
+        municipio: data.municipio,
+        uf: data.uf,
+        titulo_eleitor: data.titulo_eleitor || null,
+        zona: data.zona || null,
+        secao: data.secao || null,
+        municipio_titulo: data.municipio_titulo || null,
+        uf_titulo: data.uf_titulo || null,
+        observacoes: data.observacoes || null,
+        consentimento_bool: data.consentimento_bool,
+        finalidade: data.finalidade,
+        origem: 'campo',
+        criado_por: colaborador.usuario_id,
+        data_consentimento: new Date().toISOString(),
+      };
 
       const { error, data: novaPessoa } = await supabase
         .from("pessoa")
-        .insert([{
-          ...data,
-          email: data.email || null,
-          origem: 'campo',
-          criado_por: colaborador.usuario_id,
-          data_consentimento: new Date().toISOString(),
-        }])
+        .insert([payload])
         .select("cidadao_id")
         .single();
       
