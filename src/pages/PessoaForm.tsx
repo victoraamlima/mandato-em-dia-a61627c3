@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import type { TablesInsert } from "@/integrations/supabase/types";
+import { useSession } from "@/components/auth/SessionContextProvider";
 
 const schema = z.object({
   nome: z.string().min(3, "Nome obrigatório"),
@@ -30,6 +31,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function PessoaForm() {
   const navigate = useNavigate();
+  const { user } = useSession();
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -51,6 +53,8 @@ export default function PessoaForm() {
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
+      if (!user) throw new Error("Usuário não autenticado.");
+
       const pessoa: TablesInsert<"pessoa"> = {
         nome: data.nome,
         cpf: data.cpf,
@@ -67,6 +71,7 @@ export default function PessoaForm() {
         consentimento_bool: !!data.consentimento_bool,
         data_consentimento: data.consentimento_bool ? new Date().toISOString().slice(0, 10) : undefined,
         origem: "gabinete",
+        criado_por: user.id,
       };
       const { error } = await supabase.from("pessoa").insert([pessoa]);
       if (error) throw error;
@@ -107,7 +112,7 @@ export default function PessoaForm() {
               <input type="checkbox" {...form.register("consentimento_bool")} id="consentimento" />
               <label htmlFor="consentimento" className="text-sm">Consentimento LGPD</label>
             </div>
-            <Button type="submit" className="w-full" disabled={mutation.isPending}>
+            <Button type="submit" className="w-full" disabled={mutation.isPending || !user}>
               {mutation.isPending ? "Salvando..." : "Cadastrar"}
             </Button>
           </form>
