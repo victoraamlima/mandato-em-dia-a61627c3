@@ -4,3 +4,30 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export function normalizeCPF(cpf: string): string {
+  return cpf.replace(/[^\d]/g, "");
+}
+
+export function isValidCPF(cpf: string): boolean {
+  cpf = normalizeCPF(cpf);
+  if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+
+  const digits = cpf.split("").map(Number);
+  
+  const calc = (slice: number) => {
+    let sum = 0;
+    for (let i = 0; i < slice; i++) {
+      sum += digits[i] * (slice + 1 - i);
+    }
+    const remainder = (sum * 10) % 11;
+    return remainder === 10 ? 0 : remainder;
+  };
+
+  return calc(9) === digits[9] && calc(10) === digits[10];
+}
+
+export function maskCpf(cpf: string) {
+  if (!cpf) return "";
+  return cpf.replace(/^(\d{3})\d{6}(\d{2})$/, "$1.***.***-$2");
+}

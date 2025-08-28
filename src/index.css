@@ -147,6 +147,28 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
+  .theme-campo {
+    --background: 220 14% 7%; /* #121420 */
+    --foreground: 220 14% 93%; /* #E6EAF2 */
+    --card: 220 14% 9%; /* #171A21 */
+    --card-foreground: 220 14% 93%;
+    --popover: 220 14% 9%;
+    --popover-foreground: 220 14% 93%;
+    --primary: 172 65% 50%; /* #2DD4BF */
+    --primary-foreground: 220 14% 7%;
+    --secondary: 220 10% 15%;
+    --secondary-foreground: 220 14% 93%;
+    --muted: 220 10% 15%;
+    --muted-foreground: 220 10% 60%; /* #AAB2C0 */
+    --accent: 220 10% 15%;
+    --accent-foreground: 220 14% 93%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 10% 17%; /* #232733 */
+    --input: 220 10% 17%;
+    --ring: 172 65% 50%;
+  }
 }
 
 @layer base {

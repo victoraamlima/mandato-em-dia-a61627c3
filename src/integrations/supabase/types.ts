@@ -375,6 +375,7 @@ export type Database = {
       }
       usuario: {
         Row: {
+          app_scopes: string[]
           ativo: boolean
           created_at: string
           email: string
@@ -385,6 +386,7 @@ export type Database = {
           usuario_id: string
         }
         Insert: {
+          app_scopes?: string[]
           ativo?: boolean
           created_at?: string
           email: string
@@ -395,6 +397,7 @@ export type Database = {
           usuario_id?: string
         }
         Update: {
+          app_scopes?: string[]
           ativo?: boolean
           created_at?: string
           email?: string
