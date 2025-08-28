@@ -54,9 +54,11 @@ export type Database = {
           evento_id: string
           fim: string
           inicio: string
+          is_atendimento_deputado: boolean
           lat: number | null
           lng: number | null
           local: string
+          status: string | null
           tipo: string | null
           titulo: string
           updated_at: string
@@ -67,9 +69,11 @@ export type Database = {
           evento_id?: string
           fim: string
           inicio: string
+          is_atendimento_deputado?: boolean
           lat?: number | null
           lng?: number | null
           local: string
+          status?: string | null
           tipo?: string | null
           titulo: string
           updated_at?: string
@@ -80,9 +84,11 @@ export type Database = {
           evento_id?: string
           fim?: string
           inicio?: string
+          is_atendimento_deputado?: boolean
           lat?: number | null
           lng?: number | null
           local?: string
+          status?: string | null
           tipo?: string | null
           titulo?: string
           updated_at?: string

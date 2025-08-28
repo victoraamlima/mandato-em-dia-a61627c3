@@ -20,6 +20,7 @@ import Usuarios from "./pages/Usuarios";
 import UsuarioForm from "./pages/UsuarioForm";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
+import Agenda from "./pages/Agenda";
 
 const queryClient = new QueryClient();
 
@@ -169,10 +170,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div className="p-8 text-center">
-                      <h1 className="text-2xl font-bold">Agenda</h1>
-                      <p className="text-muted-foreground">Em desenvolvimento</p>
-                    </div>
+                    <Agenda />
                   </AppLayout>
                 </ProtectedRoute>
               }
