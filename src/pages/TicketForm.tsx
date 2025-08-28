@@ -69,9 +69,15 @@ export default function TicketForm() {
         const { error } = await supabase.from("ticket").update(ticketUpdate).eq("ticket_id", id);
         if (error) throw error;
       } else {
-        const ticketInsert: TablesInsert<"ticket"> = { 
-          ...data, 
-          cadastrado_por: user.id 
+        const ticketInsert: TablesInsert<"ticket"> = {
+          motivo_atendimento: data.motivo_atendimento,
+          categoria: data.categoria,
+          prioridade: data.prioridade,
+          status: data.status,
+          descricao_curta: data.descricao_curta,
+          descricao: data.descricao,
+          cidadao_id: data.cidadao_id,
+          cadastrado_por: user.id,
         };
         const { error } = await supabase.from("ticket").insert([ticketInsert]);
         if (error) throw error;

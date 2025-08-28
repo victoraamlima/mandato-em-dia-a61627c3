@@ -29,6 +29,11 @@ const schema = z.object({
   uf: z.string().min(2, "UF obrigatório"),
   cep: z.string().min(8, "CEP obrigatório"),
   consentimento_bool: z.boolean().default(false),
+  titulo_eleitor: z.string().optional(),
+  zona: z.string().optional(),
+  secao: z.string().optional(),
+  municipio_titulo: z.string().optional(),
+  uf_titulo: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -62,6 +67,7 @@ export default function PessoaForm() {
       nome: "", cpf: "", dt_nasc: "", sexo: "", tel1: "", email: "",
       logradouro: "", numero: "", bairro: "", municipio: "", uf: "", cep: "",
       consentimento_bool: false,
+      titulo_eleitor: "", zona: "", secao: "", municipio_titulo: "", uf_titulo: "",
     },
   });
 
@@ -71,6 +77,11 @@ export default function PessoaForm() {
         ...existingPessoa,
         email: existingPessoa.email || "",
         dt_nasc: existingPessoa.dt_nasc ? existingPessoa.dt_nasc.split('T')[0] : "",
+        titulo_eleitor: existingPessoa.titulo_eleitor || "",
+        zona: existingPessoa.zona || "",
+        secao: existingPessoa.secao || "",
+        municipio_titulo: existingPessoa.municipio_titulo || "",
+        uf_titulo: existingPessoa.uf_titulo || "",
       });
     }
   }, [existingPessoa, form]);
@@ -79,26 +90,35 @@ export default function PessoaForm() {
     mutationFn: async (data: FormData) => {
       if (!user) throw new Error("Usuário não autenticado.");
 
+      const payload = {
+        nome: data.nome,
+        cpf: data.cpf,
+        dt_nasc: data.dt_nasc,
+        sexo: data.sexo,
+        tel1: data.tel1,
+        email: data.email || null,
+        logradouro: data.logradouro,
+        numero: data.numero,
+        bairro: data.bairro,
+        municipio: data.municipio,
+        uf: data.uf,
+        cep: data.cep,
+        consentimento_bool: data.consentimento_bool,
+        titulo_eleitor: data.titulo_eleitor || null,
+        zona: data.zona || null,
+        secao: data.secao || null,
+        municipio_titulo: data.municipio_titulo || null,
+        uf_titulo: data.uf_titulo || null,
+      };
+
       if (isEditing) {
-        const pessoaUpdate: TablesUpdate<"pessoa"> = { ...data, atualizado_por: user.id };
+        const pessoaUpdate: TablesUpdate<"pessoa"> = { ...payload, atualizado_por: user.id };
         const { error } = await supabase.from("pessoa").update(pessoaUpdate).eq("cidadao_id", id);
         if (error) throw error;
       } else {
         const pessoaInsert: TablesInsert<"pessoa"> = {
-            nome: data.nome,
-            cpf: data.cpf,
-            dt_nasc: data.dt_nasc,
-            sexo: data.sexo,
-            tel1: data.tel1,
-            email: data.email || null,
-            logradouro: data.logradouro,
-            numero: data.numero,
-            bairro: data.bairro,
-            municipio: data.municipio,
-            uf: data.uf,
-            cep: data.cep,
-            consentimento_bool: data.consentimento_bool,
-            data_consentimento: data.consentimento_bool ? new Date().toISOString().slice(0, 10) : undefined,
+            ...payload,
+            data_consentimento: new Date().toISOString().slice(0, 10),
             origem: "gabinete",
             criado_por: user.id,
         };
@@ -210,6 +230,34 @@ export default function PessoaForm() {
                     <Label htmlFor="uf">UF</Label>
                     <Input id="uf" {...form.register("uf")} />
                     {form.formState.errors.uf && <p className="text-sm text-destructive">{form.formState.errors.uf.message}</p>}
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset className="space-y-4">
+              <legend className="text-lg font-medium text-foreground mb-2 border-b pb-2">Dados Eleitorais (Opcional)</legend>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="titulo_eleitor">Título de Eleitor</Label>
+                    <Input id="titulo_eleitor" {...form.register("titulo_eleitor")} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="zona">Zona</Label>
+                    <Input id="zona" {...form.register("zona")} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="secao">Seção</Label>
+                    <Input id="secao" {...form.register("secao")} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="municipio_titulo">Município do Título</Label>
+                    <Input id="municipio_titulo" {...form.register("municipio_titulo")} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="uf_titulo">UF do Título</Label>
+                    <Input id="uf_titulo" {...form.register("uf_titulo")} />
                 </div>
               </div>
             </fieldset>
