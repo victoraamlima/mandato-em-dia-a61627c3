@@ -69,7 +69,7 @@ const Step1 = ({ form }: StepProps) => (
           name="dt_nasc"
           control={form.control}
           render={({ field }) => (
-            <InputMask mask="99/99/9999" value={field.value} onChange={field.onChange}>
+            <InputMask mask="99/99/9999" value={field.value} onChange={field.onChange} disabled={false}>
               {(inputProps: any) => <Input {...inputProps} id="dt_nasc" placeholder="DD/MM/AAAA" />}
             </InputMask>
           )}
@@ -95,7 +95,7 @@ const Step2 = ({ form }: StepProps) => (
           name="tel1"
           control={form.control}
           render={({ field }) => (
-            <InputMask mask="(99) 99999-9999" value={field.value} onChange={field.onChange}>
+            <InputMask mask="(99) 99999-9999" value={field.value} onChange={field.onChange} disabled={false}>
               {(inputProps: any) => <Input {...inputProps} id="tel1" placeholder="(99) 99999-9999" />}
             </InputMask>
           )}
@@ -108,7 +108,7 @@ const Step2 = ({ form }: StepProps) => (
           name="tel2"
           control={form.control}
           render={({ field }) => (
-            <InputMask mask="(99) 99999-9999" value={field.value || ''} onChange={field.onChange}>
+            <InputMask mask="(99) 99999-9999" value={field.value || ''} onChange={field.onChange} disabled={false}>
               {(inputProps: any) => <Input {...inputProps} id="tel2" placeholder="(99) 99999-9999" />}
             </InputMask>
           )}
@@ -140,15 +140,10 @@ const Step3 = ({ form, onCepAutoFill, cepLoading, cepError }: StepProps) => (
                 field.onChange(e);
                 if (onCepAutoFill) onCepAutoFill(e.target.value);
               }}
+              disabled={cepLoading}
             >
               {(inputProps: any) => (
-                <Input
-                  {...inputProps}
-                  id="cep"
-                  placeholder="00000-000"
-                  autoComplete="postal-code"
-                  disabled={cepLoading}
-                />
+                <Input {...inputProps} id="cep" placeholder="00000-000" />
               )}
             </InputMask>
           )}
