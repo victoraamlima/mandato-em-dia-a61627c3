@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { User, Mail, Phone, MapPin, Edit, ArrowLeft, Ticket as TicketIcon } from "lucide-react";
+import { User, Mail, Phone, MapPin, Edit, ArrowLeft, Ticket as TicketIcon, FileText, CheckSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const fetchPessoa = async (id: string) => {
@@ -28,6 +28,13 @@ const fetchTickets = async (cidadaoId: string) => {
     return data;
 }
 
+const InfoItem = ({ label, value }: { label: string; value: React.ReactNode }) => (
+  <div>
+    <p className="text-sm font-medium text-muted-foreground">{label}</p>
+    <p className="text-foreground">{value || <span className="text-gray-400">Não informado</span>}</p>
+  </div>
+);
+
 export default function PessoaDetalhes() {
   const { id } = useParams<{ id: string }>();
 
@@ -47,7 +54,8 @@ export default function PessoaDetalhes() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-10 w-1/4" />
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
+          <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
@@ -69,10 +77,7 @@ export default function PessoaDetalhes() {
             Voltar
           </Link>
         </Button>
-        <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold text-foreground">{pessoa.nome}</h1>
-            <Badge variant="secondary">{pessoa.cpf}</Badge>
-        </div>
+        <h1 className="text-3xl font-bold text-foreground">{pessoa.nome}</h1>
         <Button asChild>
           <Link to={`/pessoas/${id}/editar`}>
             <Edit className="w-4 h-4 mr-2" />
@@ -81,21 +86,50 @@ export default function PessoaDetalhes() {
         </Button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="card-institutional">
           <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-5 h-5 text-primary" /> Dados Pessoais</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <p><strong>Data de Nasc.:</strong> {new Date(pessoa.dt_nasc).toLocaleDateString('pt-BR')}</p>
-            <p><strong>Sexo:</strong> {pessoa.sexo}</p>
-            <p><strong>Título de Eleitor:</strong> {pessoa.titulo_eleitor || "Não informado"}</p>
+          <CardContent className="space-y-4">
+            <InfoItem label="CPF" value={pessoa.cpf} />
+            <InfoItem label="Data de Nascimento" value={new Date(pessoa.dt_nasc).toLocaleDateString('pt-BR')} />
+            <InfoItem label="Sexo" value={pessoa.sexo} />
           </CardContent>
         </Card>
         <Card className="card-institutional">
-          <CardHeader><CardTitle className="flex items-center gap-2"><Phone className="w-5 h-5 text-primary" /> Contato e Endereço</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <p><strong>Telefone:</strong> {pessoa.tel1}</p>
-            <p><strong>Email:</strong> {pessoa.email || "Não informado"}</p>
-            <p><strong>Endereço:</strong> {`${pessoa.logradouro}, ${pessoa.numero} - ${pessoa.bairro}, ${pessoa.municipio}/${pessoa.uf}`}</p>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Phone className="w-5 h-5 text-primary" /> Contato</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <InfoItem label="Telefone Principal" value={pessoa.tel1} />
+            <InfoItem label="Telefone Secundário" value={pessoa.tel2} />
+            <InfoItem label="Email" value={pessoa.email} />
+          </CardContent>
+        </Card>
+        <Card className="card-institutional">
+          <CardHeader><CardTitle className="flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Endereço</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <InfoItem label="Logradouro" value={`${pessoa.logradouro}, ${pessoa.numero} ${pessoa.complemento || ''}`} />
+            <InfoItem label="Bairro" value={pessoa.bairro} />
+            <InfoItem label="Município/UF" value={`${pessoa.municipio}/${pessoa.uf}`} />
+            <InfoItem label="CEP" value={pessoa.cep} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="card-institutional">
+          <CardHeader><CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> Dados Eleitorais</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <InfoItem label="Título de Eleitor" value={pessoa.titulo_eleitor} />
+            <InfoItem label="Zona" value={pessoa.zona} />
+            <InfoItem label="Seção" value={pessoa.secao} />
+            <InfoItem label="Município/UF do Título" value={pessoa.municipio_titulo && pessoa.uf_titulo ? `${pessoa.municipio_titulo}/${pessoa.uf_titulo}` : null} />
+          </CardContent>
+        </Card>
+        <Card className="card-institutional">
+          <CardHeader><CardTitle className="flex items-center gap-2"><CheckSquare className="w-5 h-5 text-primary" /> Outras Informações</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <InfoItem label="Observações" value={pessoa.observacoes} />
+            <InfoItem label="Consentimento LGPD" value={pessoa.consentimento_bool ? `Sim, em ${new Date(pessoa.data_consentimento).toLocaleDateString('pt-BR')}` : 'Não'} />
+            <InfoItem label="Data de Cadastro" value={new Date(pessoa.created_at).toLocaleString('pt-BR')} />
           </CardContent>
         </Card>
       </div>
