@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/components/auth/SessionContextProvider";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { pt } from "@supabase/auth-ui-shared/locales";
 
 export default function Login() {
   const { session, isLoading } = useSession();
@@ -33,6 +34,9 @@ export default function Login() {
         <Auth
           supabaseClient={supabase}
           providers={[]}
+          localization={{
+            variables: pt,
+          }}
           appearance={{
             theme: ThemeSupa,
             variables: {

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -7,21 +7,19 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/hooks/useUser";
 import { isValidCPF, normalizeCPF } from "@/lib/utils";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import InputMask from "react-input-mask";
-import { TablesInsert } from "@/integrations/supabase/types";
 
 const schema = z.object({
-  cpf: z.string().refine((cpf) => isValidCPF(normalizeCPF(cpf)), "CPF inválido"),
+  cpf: z.string().refine(isValidCPF, "CPF inválido"),
   nome: z.string().min(3, "Nome completo é obrigatório"),
   dt_nasc: z.string().min(1, "Data de nascimento é obrigatória"),
   sexo: z.string().min(1, "Sexo é obrigatório"),
@@ -93,7 +91,7 @@ export default function CampoCadastro() {
       if (!colaborador) throw new Error("Colaborador não identificado.");
 
       const normalizedCpf = normalizeCPF(data.cpf);
-      const { data: existing } = await supabase.from("pessoa").select("cidadao_id").eq("cpf", normalizedCpf).maybeSingle();
+      const { data: existing } = await supabase.from("pessoa").select("cidadao_id").eq("cpf", normalizedCpf).single();
       if (existing) throw new Error("Este CPF já foi cadastrado.");
 
       const payload: TablesInsert<'pessoa'> = {
@@ -124,7 +122,7 @@ export default function CampoCadastro() {
         data_consentimento: new Date().toISOString(),
       };
 
-      const { error, data: novaPessoa } = await supabase
+      const { data: novaPessoa, error } = await supabase
         .from("pessoa")
         .insert([payload])
         .select("cidadao_id")

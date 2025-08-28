@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { CampoLayout } from "@/components/layout/CampoLayout";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { pt } from "@supabase/auth-ui-shared/locales";
 
 export default function CampoLogin() {
   const { session, isLoading } = useSession();
@@ -61,6 +62,9 @@ export default function CampoLogin() {
           <Auth
             supabaseClient={supabase}
             providers={[]}
+            localization={{
+              variables: pt,
+            }}
             appearance={{
               variables: {
                 default: {
@@ -75,8 +79,8 @@ export default function CampoLogin() {
                     inputBorderFocus: "#2DD4BF",
                   },
                   radii: {
-                    buttonBorderRadius: "0.5rem",
                     inputBorderRadius: "0.5rem",
+                    buttonBorderRadius: "0.5rem",
                   }
                 },
               },
