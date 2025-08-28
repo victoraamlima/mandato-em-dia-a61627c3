@@ -11,7 +11,6 @@ import {
   Eye,
   MoreHorizontal,
   Edit,
-  Calendar,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -29,61 +28,56 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { differenceInDays, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 // Hook para buscar estatísticas do dashboard
 function useDashboardStats() {
-  return useQuery({
-    queryKey: ["dashboardStats"],
+  // Tickets abertos
+  const ticketsAbertos = useQuery({
+    queryKey: ["dashboard", "ticketsAbertos"],
     queryFn: async () => {
-      // Executa todas as consultas em paralelo
-      const [
-        openTicketsRes,
-        peopleCountRes,
-        closedTicketsRes,
-        totalTicketsRes,
-        closedTicketsForAvgTimeRes,
-      ] = await Promise.all([
-        supabase.from("ticket").select("ticket_id", { count: "exact", head: true }).eq("status", "Aberto"),
-        supabase.from("pessoa").select("cidadao_id", { count: "exact", head: true }),
-        supabase.from("ticket").select("ticket_id", { count: "exact", head: true }).eq("status", "Fechado"),
-        supabase.from("ticket").select("ticket_id", { count: "exact", head: true }),
-        supabase.from("ticket").select("created_at, data_fechamento").eq("status", "Fechado").not("data_fechamento", "is", null).limit(1000),
-      ]);
-
-      // Tratamento de erros
-      if (openTicketsRes.error) throw openTicketsRes.error;
-      if (peopleCountRes.error) throw peopleCountRes.error;
-      if (closedTicketsRes.error) throw closedTicketsRes.error;
-      if (totalTicketsRes.error) throw totalTicketsRes.error;
-      if (closedTicketsForAvgTimeRes.error) throw closedTicketsForAvgTimeRes.error;
-
-      // Cálculo da Taxa de Resolução
-      const closedCount = closedTicketsRes.count ?? 0;
-      const totalCount = totalTicketsRes.count ?? 0;
-      const resolutionRate = totalCount > 0 ? (closedCount / totalCount) * 100 : 0;
-
-      // Cálculo do Tempo Médio de Resolução
-      const ticketsForAvg = closedTicketsForAvgTimeRes.data ?? [];
-      let avgResolutionTime = 0;
-      if (ticketsForAvg.length > 0) {
-        const totalDays = ticketsForAvg.reduce((acc, ticket) => {
-          const created = new Date(ticket.created_at);
-          const closed = new Date(ticket.data_fechamento!);
-          return acc + differenceInDays(closed, created);
-        }, 0);
-        avgResolutionTime = totalDays / ticketsForAvg.length;
-      }
-
-      return {
-        openTickets: openTicketsRes.count ?? 0,
-        peopleCount: peopleCountRes.count ?? 0,
-        resolutionRate: Math.round(resolutionRate),
-        avgResolutionTime: Math.round(avgResolutionTime),
-      };
+      const { count, error } = await supabase
+        .from("ticket")
+        .select("ticket_id", { count: "exact", head: true })
+        .eq("status", "Aberto");
+      if (error) throw error;
+      return count ?? 0;
     },
+    initialData: 0,
   });
+
+  // Pessoas cadastradas
+  const pessoasCount = useQuery({
+    queryKey: ["dashboard", "pessoasCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("pessoa")
+        .select("cidadao_id", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+    initialData: 0,
+  });
+
+  // Tempo médio (dummy, implementar depois)
+  const tempoMedio = useQuery({
+    queryKey: ["dashboard", "tempoMedio"],
+    queryFn: async () => 0,
+    initialData: 0,
+  });
+
+  // Taxa de resolução (dummy, implementar depois)
+  const taxaResolucao = useQuery({
+    queryKey: ["dashboard", "taxaResolucao"],
+    queryFn: async () => 0,
+    initialData: 0,
+  });
+
+  return {
+    ticketsAbertos,
+    pessoasCount,
+    tempoMedio,
+    taxaResolucao,
+  };
 }
 
 // Hook para buscar os tickets mais recentes
@@ -104,56 +98,53 @@ function useRecentTickets() {
   });
 }
 
-// Hook para buscar os próximos eventos
-function useUpcomingEvents() {
-    return useQuery({
-        queryKey: ["dashboard", "upcomingEvents"],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from("evento")
-                .select("evento_id, titulo, inicio, local")
-                .gte("inicio", new Date().toISOString())
-                .order("inicio", { ascending: true })
-                .limit(3);
-            if (error) throw error;
-            return data ?? [];
-        }
-    });
-}
-
 export default function Dashboard() {
-  const { data: stats, isLoading: loadingStats } = useDashboardStats();
-  const { data: recentTickets, isLoading: loadingRecent, isError: errorRecent } = useRecentTickets();
-  const { data: upcomingEvents, isLoading: loadingEvents } = useUpcomingEvents();
+  const {
+    ticketsAbertos,
+    pessoasCount,
+    tempoMedio,
+    taxaResolucao,
+  } = useDashboardStats();
 
-  const statCards = [
+  const {
+    data: recentTickets,
+    isLoading: loadingRecent,
+    isError: errorRecent,
+  } = useRecentTickets();
+
+  const stats = [
     {
       title: "Tickets Abertos",
-      value: stats?.openTickets ?? 0,
+      value: ticketsAbertos.isLoading ? "-" : ticketsAbertos.data,
       description: "Aguardando atendimento",
       icon: Ticket,
-      loading: loadingStats,
+      loading: ticketsAbertos.isLoading,
     },
     {
       title: "Pessoas Cadastradas",
-      value: stats?.peopleCount ?? 0,
+      value: pessoasCount.isLoading ? "-" : pessoasCount.data,
       description: "Total no sistema",
       icon: Users,
-      loading: loadingStats,
+      loading: pessoasCount.isLoading,
     },
     {
       title: "Tempo Médio",
-      value: `${stats?.avgResolutionTime ?? 0} dias`,
+      value:
+        tempoMedio.isLoading
+          ? "-"
+          : tempoMedio.data === 0
+          ? "0"
+          : `${tempoMedio.data} dias`,
       description: "Para conclusão",
       icon: Clock,
-      loading: loadingStats,
+      loading: tempoMedio.isLoading,
     },
     {
       title: "Taxa de Resolução",
-      value: `${stats?.resolutionRate ?? 0}%`,
+      value: taxaResolucao.isLoading ? "-" : taxaResolucao.data,
       description: "Tickets concluídos",
       icon: TrendingUp,
-      loading: loadingStats,
+      loading: taxaResolucao.isLoading,
     },
   ];
 
@@ -177,103 +168,131 @@ export default function Dashboard() {
 
       {/* Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {statCards.map((stat) => (
+        {stats.map((stat) => (
           <StatCard
             key={stat.title}
             title={stat.title}
-            value={stat.loading ? "-" : stat.value}
+            value={stat.value}
             description={stat.description}
             icon={stat.icon}
           />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Tickets Recentes */}
-        <Card className="card-institutional lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Tickets Recentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loadingRecent ? (
-              <div className="text-muted-foreground text-center py-8">Carregando...</div>
-            ) : errorRecent ? (
-              <div className="text-destructive text-center py-8">Erro ao carregar tickets recentes.</div>
-            ) : recentTickets.length === 0 ? (
-              <div className="text-muted-foreground text-center py-8">Nenhum ticket recente encontrado.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Motivo</TableHead>
-                      <TableHead>Prioridade</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead></TableHead>
+      {/* Tickets Recentes */}
+      <Card className="card-institutional">
+        <CardHeader>
+          <CardTitle>Tickets Recentes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingRecent ? (
+            <div className="text-muted-foreground text-center py-8">
+              Carregando...
+            </div>
+          ) : errorRecent ? (
+            <div className="text-destructive text-center py-8">
+              Erro ao carregar tickets recentes.
+            </div>
+          ) : recentTickets.length === 0 ? (
+            <div className="text-muted-foreground text-center py-8">
+              Nenhum ticket recente encontrado.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Motivo</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Prioridade</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Criado em</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentTickets.map((ticket: any) => (
+                    <TableRow key={ticket.ticket_id}>
+                      <TableCell>{ticket.motivo_atendimento}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {ticket.categoria}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            ticket.prioridade === "Alta"
+                              ? "priority-alta"
+                              : ticket.prioridade === "Media"
+                              ? "priority-media"
+                              : "priority-baixa"
+                          }
+                        >
+                          {ticket.prioridade}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            ticket.status === "Aberto"
+                              ? "status-aberto"
+                              : ticket.status === "Fechado"
+                              ? "status-concluido"
+                              : "status-em-andamento"
+                          }
+                        >
+                          {ticket.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{ticket.descricao_curta}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(ticket.created_at).toLocaleDateString("pt-BR")}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <a href={`/tickets/${ticket.ticket_id}`}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Visualizar
+                              </a>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <a href={`/tickets/${ticket.ticket_id}/editar`}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </a>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentTickets.map((ticket: any) => (
-                      <TableRow key={ticket.ticket_id}>
-                        <TableCell className="font-medium">{ticket.motivo_atendimento}</TableCell>
-                        <TableCell>
-                          <Badge className={ticket.prioridade === "Alta" ? "priority-alta" : ticket.prioridade === "Media" ? "priority-media" : "priority-baixa"}>
-                            {ticket.prioridade}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={ticket.status === "Aberto" ? "status-aberto" : ticket.status === "Fechado" ? "status-concluido" : "status-em-andamento"}>
-                            {ticket.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild><Button variant="ghost" size="sm"><MoreHorizontal className="w-4 h-4" /></Button></DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild><a href={`/tickets/${ticket.ticket_id}`}><Eye className="w-4 h-4 mr-2" />Visualizar</a></DropdownMenuItem>
-                              <DropdownMenuItem asChild><a href={`/tickets/${ticket.ticket_id}/editar`}><Edit className="w-4 h-4 mr-2" />Editar</a></DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Próximos Eventos */}
-        <Card className="card-institutional">
-          <CardHeader>
-            <CardTitle>Próximos Eventos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loadingEvents ? (
-                <div className="text-muted-foreground text-center py-8">Carregando...</div>
-            ) : !upcomingEvents || upcomingEvents.length === 0 ? (
-                <div className="text-muted-foreground text-center py-8">Nenhum evento futuro.</div>
-            ) : (
-                <ul className="space-y-4">
-                    {upcomingEvents.map(evento => (
-                        <li key={evento.evento_id} className="flex items-start gap-4">
-                            <div className="flex flex-col items-center justify-center bg-primary-light text-primary font-bold rounded-md p-2 w-16 h-16">
-                                <span className="text-xs uppercase">{format(new Date(evento.inicio), 'MMM', { locale: ptBR })}</span>
-                                <span className="text-2xl">{format(new Date(evento.inicio), 'd')}</span>
-                            </div>
-                            <div>
-                                <p className="font-semibold text-foreground">{evento.titulo}</p>
-                                <p className="text-sm text-muted-foreground">{evento.local}</p>
-                                <p className="text-sm text-muted-foreground">{format(new Date(evento.inicio), 'HH:mm')}</p>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Próximos Eventos (placeholder) */}
+      <Card className="card-institutional">
+        <CardHeader>
+          <CardTitle>Próximos Eventos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-muted-foreground text-center py-8">
+            Em breve: próximos eventos do gabinete.
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
