@@ -45,7 +45,7 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
-type StepProps = { form: UseFormReturn<FormData> };
+type StepProps = { form: UseFormReturn<FormData>; onCepAutoFill?: (cep: string) => void; cepLoading?: boolean; cepError?: string | null; };
 
 const TOTAL_STEPS = 5;
 
@@ -123,7 +123,7 @@ const Step2 = ({ form }: StepProps) => (
   </fieldset>
 );
 
-const Step3 = ({ form }: StepProps) => (
+const Step3 = ({ form, onCepAutoFill, cepLoading, cepError }: StepProps) => (
   <fieldset className="space-y-4">
     <legend className="text-lg font-medium text-foreground mb-2">Endereço</legend>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -133,11 +133,32 @@ const Step3 = ({ form }: StepProps) => (
           name="cep"
           control={form.control}
           render={({ field }) => (
-            <InputMask mask="99999-999" value={field.value} onChange={field.onChange}>
-              {(inputProps: any) => <Input {...inputProps} id="cep" placeholder="00000-000" />}
+            <InputMask
+              mask="99999-999"
+              value={field.value}
+              onChange={e => {
+                field.onChange(e);
+                if (onCepAutoFill) onCepAutoFill(e.target.value);
+              }}
+            >
+              {(inputProps: any) => (
+                <Input
+                  {...inputProps}
+                  id="cep"
+                  placeholder="00000-000"
+                  autoComplete="postal-code"
+                  disabled={cepLoading}
+                />
+              )}
             </InputMask>
           )}
         />
+        {cepLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" /> Buscando endereço...
+          </div>
+        )}
+        {cepError && <p className="text-sm text-destructive">{cepError}</p>}
         {form.formState.errors.cep && <p className="text-sm text-destructive">{form.formState.errors.cep.message}</p>}
       </div>
     </div>
@@ -247,6 +268,11 @@ export default function CampoCadastro() {
   const { user: colaborador } = useUser();
   const [step, setStep] = useState(1);
 
+  // Estado para integração com ViaCEP
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+  const [lastCep, setLastCep] = useState<string>("");
+
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     mode: "onChange",
@@ -265,6 +291,35 @@ export default function CampoCadastro() {
       navigate("/campo");
     }
   }, [cpfParam, navigate]);
+
+  // Função para buscar endereço pelo CEP
+  const handleCepAutoFill = async (cepInput: string) => {
+    const cep = cepInput.replace(/\D/g, "");
+    if (cep.length !== 8 || cep === lastCep) return;
+    setLastCep(cep);
+    setCepError(null);
+    setCepLoading(true);
+
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (data.erro) {
+        setCepError("CEP não encontrado.");
+        setCepLoading(false);
+        return;
+      }
+      // Preenche os campos automaticamente
+      form.setValue("logradouro", data.logradouro || "");
+      form.setValue("bairro", data.bairro || "");
+      form.setValue("municipio", data.localidade || "");
+      form.setValue("uf", data.uf || "");
+      setCepError(null);
+    } catch (e) {
+      setCepError("Erro ao buscar o CEP. Tente novamente.");
+    } finally {
+      setCepLoading(false);
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -325,7 +380,14 @@ export default function CampoCadastro() {
         <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-8">
           {step === 1 && <Step1 form={form} />}
           {step === 2 && <Step2 form={form} />}
-          {step === 3 && <Step3 form={form} />}
+          {step === 3 && (
+            <Step3
+              form={form}
+              onCepAutoFill={handleCepAutoFill}
+              cepLoading={cepLoading}
+              cepError={cepError}
+            />
+          )}
           {step === 4 && <Step4 form={form} />}
           {step === 5 && <Step5 form={form} />}
 
@@ -336,7 +398,12 @@ export default function CampoCadastro() {
               </Button>
             )}
             {step < TOTAL_STEPS && (
-              <Button type="button" className="w-full h-12 text-base" onClick={handleNextStep}>
+              <Button
+                type="button"
+                className="w-full h-12 text-base"
+                onClick={handleNextStep}
+                disabled={cepLoading}
+              >
                 Avançar
               </Button>
             )}
