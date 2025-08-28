@@ -95,7 +95,14 @@ export default function TicketForm() {
 
       if (isEditing) {
         const ticketUpdate: TablesUpdate<"ticket"> = {
-          ...data,
+          motivo_atendimento: data.motivo_atendimento,
+          categoria: data.categoria,
+          subcategoria: data.subcategoria,
+          prioridade: data.prioridade,
+          status: data.status,
+          descricao_curta: data.descricao_curta,
+          descricao: data.descricao,
+          cidadao_id: data.cidadao_id,
           atendente_id: data.atendente_id || null,
           colaborador_id: data.colaborador_id || null,
           prazo_sla: data.prazo_sla || null,
