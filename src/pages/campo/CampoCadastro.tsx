@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -21,7 +21,7 @@ import InputMask from "react-input-mask";
 const schema = z.object({
   cpf: z.string().refine(isValidCPF, "CPF inválido"),
   nome: z.string().min(3, "Nome completo é obrigatório"),
-  dt_nasc: z.string().min(1, "Data de nascimento é obrigatória"),
+  dt_nasc: z.string().min(10, "Data de nascimento é obrigatória"),
   sexo: z.string().min(1, "Sexo é obrigatório"),
   tel1: z.string().min(10, "Telefone principal é obrigatório"),
   tel2: z.string().optional(),
@@ -147,14 +147,196 @@ export default function CampoCadastro() {
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-8">
-          {/* ... sections for form fields ... */}
-          <Button type="submit" className="w-full h-12 text-base" disabled={mutation.isPending}>
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Salvar Cadastro
-          </Button>
-          <Button type="button" variant="outline" className="w-full h-12 text-base" onClick={() => navigate('/campo')}>
-            Cancelar
-          </Button>
+          
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-medium text-foreground mb-2 border-b pb-2">Dados Pessoais</legend>
+            <div className="space-y-2">
+              <Label htmlFor="cpf">CPF</Label>
+              <Input id="cpf" {...form.register("cpf")} disabled />
+              {form.formState.errors.cpf && <p className="text-sm text-destructive">{form.formState.errors.cpf.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="nome">Nome Completo</Label>
+              <Input id="nome" {...form.register("nome")} />
+              {form.formState.errors.nome && <p className="text-sm text-destructive">{form.formState.errors.nome.message}</p>}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dt_nasc">Data de Nascimento</Label>
+                <Controller
+                  name="dt_nasc"
+                  control={form.control}
+                  render={({ field }) => (
+                    <InputMask mask="99/99/9999" value={field.value} onChange={field.onChange}>
+                      {(inputProps: any) => <Input {...inputProps} id="dt_nasc" placeholder="DD/MM/AAAA" />}
+                    </InputMask>
+                  )}
+                />
+                {form.formState.errors.dt_nasc && <p className="text-sm text-destructive">{form.formState.errors.dt_nasc.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sexo">Sexo</Label>
+                <Input id="sexo" {...form.register("sexo")} />
+                {form.formState.errors.sexo && <p className="text-sm text-destructive">{form.formState.errors.sexo.message}</p>}
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-medium text-foreground mb-2 border-b pb-2">Contato</legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="tel1">Telefone Principal</Label>
+                <Controller
+                  name="tel1"
+                  control={form.control}
+                  render={({ field }) => (
+                    <InputMask mask="(99) 99999-9999" value={field.value} onChange={field.onChange}>
+                      {(inputProps: any) => <Input {...inputProps} id="tel1" placeholder="(99) 99999-9999" />}
+                    </InputMask>
+                  )}
+                />
+                {form.formState.errors.tel1 && <p className="text-sm text-destructive">{form.formState.errors.tel1.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tel2">Telefone Secundário (Opcional)</Label>
+                <Controller
+                  name="tel2"
+                  control={form.control}
+                  render={({ field }) => (
+                    <InputMask mask="(99) 99999-9999" value={field.value || ''} onChange={field.onChange}>
+                      {(inputProps: any) => <Input {...inputProps} id="tel2" placeholder="(99) 99999-9999" />}
+                    </InputMask>
+                  )}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail (Opcional)</Label>
+              <Input id="email" type="email" {...form.register("email")} />
+              {form.formState.errors.email && <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-medium text-foreground mb-2 border-b pb-2">Endereço</legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cep">CEP</Label>
+                <Controller
+                  name="cep"
+                  control={form.control}
+                  render={({ field }) => (
+                    <InputMask mask="99999-999" value={field.value} onChange={field.onChange}>
+                      {(inputProps: any) => <Input {...inputProps} id="cep" placeholder="00000-000" />}
+                    </InputMask>
+                  )}
+                />
+                {form.formState.errors.cep && <p className="text-sm text-destructive">{form.formState.errors.cep.message}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="logradouro">Logradouro</Label>
+                <Input id="logradouro" {...form.register("logradouro")} />
+                {form.formState.errors.logradouro && <p className="text-sm text-destructive">{form.formState.errors.logradouro.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="numero">Número</Label>
+                <Input id="numero" {...form.register("numero")} />
+                {form.formState.errors.numero && <p className="text-sm text-destructive">{form.formState.errors.numero.message}</p>}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="complemento">Complemento (Opcional)</Label>
+              <Input id="complemento" {...form.register("complemento")} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bairro">Bairro</Label>
+                <Input id="bairro" {...form.register("bairro")} />
+                {form.formState.errors.bairro && <p className="text-sm text-destructive">{form.formState.errors.bairro.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="municipio">Município</Label>
+                <Input id="municipio" {...form.register("municipio")} />
+                {form.formState.errors.municipio && <p className="text-sm text-destructive">{form.formState.errors.municipio.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="uf">UF</Label>
+                <Input id="uf" {...form.register("uf")} maxLength={2} />
+                {form.formState.errors.uf && <p className="text-sm text-destructive">{form.formState.errors.uf.message}</p>}
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-medium text-foreground mb-2 border-b pb-2">Dados Eleitorais (Opcional)</legend>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="titulo_eleitor">Título de Eleitor</Label>
+                <Input id="titulo_eleitor" {...form.register("titulo_eleitor")} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="zona">Zona</Label>
+                <Input id="zona" {...form.register("zona")} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="secao">Seção</Label>
+                <Input id="secao" {...form.register("secao")} />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="municipio_titulo">Município do Título</Label>
+                <Input id="municipio_titulo" {...form.register("municipio_titulo")} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="uf_titulo">UF do Título</Label>
+                <Input id="uf_titulo" {...form.register("uf_titulo")} maxLength={2} />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-medium text-foreground mb-2 border-b pb-2">Finalização</legend>
+            <div className="space-y-2">
+              <Label htmlFor="observacoes">Observações (Opcional)</Label>
+              <Input id="observacoes" {...form.register("observacoes")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="finalidade">Finalidade do Cadastro</Label>
+              <Input id="finalidade" {...form.register("finalidade")} />
+              {form.formState.errors.finalidade && <p className="text-sm text-destructive">{form.formState.errors.finalidade.message}</p>}
+            </div>
+            <div className="flex items-center space-x-2 pt-4">
+              <Controller
+                name="consentimento_bool"
+                control={form.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="consentimento_bool"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <Label htmlFor="consentimento_bool" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                A pessoa deu consentimento para o uso de seus dados (LGPD).
+              </Label>
+            </div>
+            {form.formState.errors.consentimento_bool && <p className="text-sm text-destructive">{form.formState.errors.consentimento_bool.message}</p>}
+          </fieldset>
+
+          <div className="flex flex-col gap-4">
+            <Button type="submit" className="w-full h-12 text-base" disabled={mutation.isPending}>
+              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Salvar Cadastro
+            </Button>
+            <Button type="button" variant="outline" className="w-full h-12 text-base" onClick={() => navigate('/campo')}>
+              Cancelar
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
