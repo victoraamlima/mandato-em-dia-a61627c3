@@ -9,7 +9,8 @@ import {
   UserCheck,
   Building2,
   CalendarCheck,
-  Landmark
+  Landmark,
+  Building
 } from "lucide-react";
 
 import {
@@ -30,6 +31,7 @@ const mainItems = [
   { title: "Atendimentos", url: "/tickets", icon: Ticket },
   { title: "Atendimentos do Deputado", url: "/atendimentos-deputado", icon: CalendarCheck },
   { title: "Agenda", url: "/agenda", icon: Calendar },
+  { title: "COHAB", url: "/cohab", icon: Building },
 ];
 
 const managementItems = [
@@ -45,7 +47,6 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
 
-  const isActive = (path: string) => currentPath === path;
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive 
       ? "bg-primary text-primary-foreground font-medium" 

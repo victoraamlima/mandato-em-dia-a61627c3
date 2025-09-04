@@ -23,6 +23,7 @@ import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import Agenda from "./pages/Agenda";
 import Financeiro from "./pages/Financeiro";
+import Cohab from "./pages/Cohab";
 
 // Rotas do Módulo de Campo
 import CampoLogin from "./pages/campo/CampoLogin";
@@ -93,6 +94,7 @@ const App = () => (
             <Route path="/atendimentos-deputado" element={<ProtectedRoute scope="backoffice"><AppLayout><AtendimentosDeputado /></AppLayout></ProtectedRoute>} />
             <Route path="/atendimentos-deputado/novo" element={<ProtectedRoute scope="backoffice"><AppLayout><AtendimentoDeputadoNovo /></AppLayout></ProtectedRoute>} />
             <Route path="/agenda" element={<ProtectedRoute scope="backoffice"><AppLayout><Agenda /></AppLayout></ProtectedRoute>} />
+            <Route path="/cohab" element={<ProtectedRoute scope="backoffice"><AppLayout><Cohab /></AppLayout></ProtectedRoute>} />
 
             <Route path="/relatorios" element={<ProtectedRoute scope="backoffice"><AppLayout><Relatorios /></AppLayout></ProtectedRoute>} />
             <Route path="/financeiro" element={<ProtectedRoute scope="backoffice"><AppLayout><Financeiro /></AppLayout></ProtectedRoute>} />
