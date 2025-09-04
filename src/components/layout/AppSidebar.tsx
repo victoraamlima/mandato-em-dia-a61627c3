@@ -8,7 +8,8 @@ import {
   Home,
   UserCheck,
   Building2,
-  CalendarCheck
+  CalendarCheck,
+  Landmark
 } from "lucide-react";
 
 import {
@@ -33,6 +34,7 @@ const mainItems = [
 
 const managementItems = [
   { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
+  { title: "Financeiro", url: "/financeiro", icon: Landmark },
   { title: "Usuários", url: "/usuarios", icon: UserCheck },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];

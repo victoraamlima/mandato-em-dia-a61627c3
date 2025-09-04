@@ -22,6 +22,7 @@ import UsuarioForm from "./pages/UsuarioForm";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import Agenda from "./pages/Agenda";
+import Financeiro from "./pages/Financeiro";
 
 // Rotas do Módulo de Campo
 import CampoLogin from "./pages/campo/CampoLogin";
@@ -94,6 +95,7 @@ const App = () => (
             <Route path="/agenda" element={<ProtectedRoute scope="backoffice"><AppLayout><Agenda /></AppLayout></ProtectedRoute>} />
 
             <Route path="/relatorios" element={<ProtectedRoute scope="backoffice"><AppLayout><Relatorios /></AppLayout></ProtectedRoute>} />
+            <Route path="/financeiro" element={<ProtectedRoute scope="backoffice"><AppLayout><Financeiro /></AppLayout></ProtectedRoute>} />
             <Route path="/usuarios" element={<ProtectedRoute scope="backoffice"><AppLayout><Usuarios /></AppLayout></ProtectedRoute>} />
             <Route path="/usuarios/novo" element={<ProtectedRoute scope="backoffice"><AppLayout><UsuarioForm /></AppLayout></ProtectedRoute>} />
             <Route path="/usuarios/:id/editar" element={<ProtectedRoute scope="backoffice"><AppLayout><UsuarioForm /></AppLayout></ProtectedRoute>} />
