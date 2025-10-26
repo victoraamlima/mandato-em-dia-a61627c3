@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, MapPin, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, MapPin, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn, normalizeCPF, isValidCPF } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ const useSearchPessoas = (rawSearchTerm: string) => {
   
   // Usamos o termo normalizado para a chave da query, garantindo que a busca por CPF seja única
   const queryKey = isCpfSearch ? normalizedSearch : rawSearchTerm;
+  const enabled = rawSearchTerm.length >= 3 || isCpfSearch;
 
   return useQuery({
     queryKey: ["search-pessoas", queryKey],
@@ -44,7 +45,7 @@ const useSearchPessoas = (rawSearchTerm: string) => {
         return data as PessoaResult[];
       } 
       
-      // Se for busca por nome (ou CPF incompleto/inválido), buscamos por nome.
+      // Se for busca por nome, buscamos por nome.
       if (rawSearchTerm.length < 3) return [];
 
       let query = supabase
@@ -57,8 +58,7 @@ const useSearchPessoas = (rawSearchTerm: string) => {
       if (error) throw error;
       return data as PessoaResult[];
     },
-    // Habilita a query se tiver 3+ caracteres ou se for um CPF válido de 11 dígitos
-    enabled: rawSearchTerm.length >= 3 || isCpfSearch,
+    enabled: enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
@@ -69,6 +69,10 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
   const [displayValue, setDisplayValue] = useState("");
 
   const { data: searchResults, isLoading: isSearching } = useSearchPessoas(searchTerm);
+
+  const normalizedSearch = normalizeCPF(searchTerm);
+  const isCpfSearch = normalizedSearch.length === 11 && isValidCPF(normalizedSearch);
+  const isSearchEnabled = searchTerm.length >= 3 || isCpfSearch;
 
   // Encontra o objeto da pessoa selecionada para exibir o nome
   const selectedPessoa = useMemo(() => {
@@ -100,13 +104,10 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
 
   // Se a busca por CPF retornar exatamente 1 resultado, seleciona automaticamente
   useEffect(() => {
-    const normalized = normalizeCPF(searchTerm);
-    const isCpfSearch = normalized.length === 11 && isValidCPF(normalized);
-
     if (isCpfSearch && !isSearching && searchResults && searchResults.length === 1) {
       handleSelect(searchResults[0]);
     }
-  }, [searchTerm, isSearching, searchResults]);
+  }, [isCpfSearch, isSearching, searchResults]);
 
 
   return (
@@ -128,8 +129,7 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
-          <Command>
-            {/* CommandInput agora gerencia a busca por nome E CPF */}
+          <Command shouldFilter={!isCpfSearch}> {/* Desabilita o filtro local se for busca por CPF */}
             <CommandInput 
                 placeholder="Buscar por nome ou CPF (apenas números)..." 
                 value={searchTerm}
@@ -144,6 +144,13 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Buscando...
                   </div>
                 </CommandEmpty>
+              ) : !isSearchEnabled ? (
+                <CommandEmpty>
+                  <div className="flex flex-col items-center justify-center py-4 text-warning">
+                    <AlertTriangle className="h-5 w-5 mb-2" />
+                    <p className="text-sm">Digite pelo menos 3 caracteres ou um CPF completo.</p>
+                  </div>
+                </CommandEmpty>
               ) : searchResults?.length === 0 ? (
                 <CommandEmpty>Nenhum cidadão encontrado.</CommandEmpty>
               ) : (
@@ -151,8 +158,8 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
                   {searchResults?.map((pessoa) => (
                     <CommandItem
                       key={pessoa.cidadao_id}
-                      // Usamos o nome como valor para que o CommandInput possa filtrar localmente
-                      value={pessoa.nome} 
+                      // Usamos o nome + CPF como valor para que o CommandInput possa filtrar localmente (quando não for CPF search)
+                      value={`${pessoa.nome} ${pessoa.cpf}`} 
                       onSelect={() => handleSelect(pessoa)}
                       className="flex items-center justify-between"
                     >
@@ -160,6 +167,9 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
                           <span className="font-medium">{pessoa.nome}</span>
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <MapPin className="w-3 h-3" /> {pessoa.municipio}/{pessoa.uf}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                              CPF: {pessoa.cpf}
                           </span>
                       </div>
                       <Check
