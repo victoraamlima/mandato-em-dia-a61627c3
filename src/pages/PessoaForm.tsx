@@ -14,12 +14,12 @@ import { useSession } from "@/components/auth/SessionContextProvider";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
-import InputMask from "react-input-mask"; // Importar InputMask
+import { Textarea } from "@/components/ui/textarea"; // Importação adicionada
 import { isValidCPF, normalizeCPF } from "@/lib/utils"; // Importar utilitários de CPF
 
 const schema = z.object({
   nome: z.string().min(3, "Nome obrigatório"),
-  cpf: z.string().refine(val => isValidCPF(normalizeCPF(val)), "CPF inválido"), // Validação de CPF
+  cpf: z.string().refine(val => normalizeCPF(val).length === 11 && isValidCPF(normalizeCPF(val)), "CPF inválido (11 dígitos)"), // Validação de CPF sem máscara
   dt_nasc: z.string().min(8, "Data de nascimento obrigatória"),
   sexo: z.string().min(1, "Sexo obrigatório"),
   tel1: z.string().min(8, "Telefone obrigatório"),
@@ -103,8 +103,8 @@ export default function PessoaForm() {
         cpf: normalizeCPF(data.cpf), // Normaliza o CPF antes de salvar
         dt_nasc: data.dt_nasc,
         sexo: data.sexo,
-        tel1: data.tel1,
-        tel2: data.tel2 || null,
+        tel1: normalizeCPF(data.tel1), // Normaliza o telefone
+        tel2: data.tel2 ? normalizeCPF(data.tel2) : null, // Normaliza o telefone
         email: data.email || null,
         logradouro: data.logradouro,
         numero: data.numero,
@@ -172,16 +172,8 @@ export default function PessoaForm() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                      <Label htmlFor="cpf">CPF</Label>
-                      <Controller
-                        name="cpf"
-                        control={form.control}
-                        render={({ field }) => (
-                          <InputMask mask="999.999.999-99" value={field.value} onChange={field.onChange}>
-                            {(inputProps: any) => <Input {...inputProps} id="cpf" />}
-                          </InputMask>
-                        )}
-                      />
+                      <Label htmlFor="cpf">CPF (apenas números)</Label>
+                      <Input id="cpf" {...form.register("cpf")} type="tel" maxLength={11} />
                       {form.formState.errors.cpf && <p className="text-sm text-destructive">{form.formState.errors.cpf.message}</p>}
                   </div>
                   <div className="space-y-2">
@@ -201,29 +193,13 @@ export default function PessoaForm() {
               <legend className="text-lg font-medium text-foreground mb-2 border-b pb-2">Contato</legend>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="tel1">Telefone Principal</Label>
-                    <Controller
-                        name="tel1"
-                        control={form.control}
-                        render={({ field }) => (
-                            <InputMask mask="(99) 99999-9999" value={field.value} onChange={field.onChange}>
-                                {(inputProps: any) => <Input {...inputProps} id="tel1" />}
-                            </InputMask>
-                        )}
-                    />
+                    <Label htmlFor="tel1">Telefone Principal (apenas números)</Label>
+                    <Input id="tel1" {...form.register("tel1")} type="tel" />
                     {form.formState.errors.tel1 && <p className="text-sm text-destructive">{form.formState.errors.tel1.message}</p>}
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="tel2">Telefone Secundário (Opcional)</Label>
-                    <Controller
-                        name="tel2"
-                        control={form.control}
-                        render={({ field }) => (
-                            <InputMask mask="(99) 99999-9999" value={field.value || ''} onChange={field.onChange}>
-                                {(inputProps: any) => <Input {...inputProps} id="tel2" />}
-                            </InputMask>
-                        )}
-                    />
+                    <Label htmlFor="tel2">Telefone Secundário (Opcional, apenas números)</Label>
+                    <Input id="tel2" {...form.register("tel2")} type="tel" />
                 </div>
               </div>
               <div className="space-y-2">

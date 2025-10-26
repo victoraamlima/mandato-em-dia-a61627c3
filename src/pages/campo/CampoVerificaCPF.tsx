@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { User, MapPin, Search, Loader2 } from "lucide-react";
-import InputMask from "react-input-mask";
 
 type PessoaExistente = {
   cidadao_id: string;
@@ -55,7 +54,7 @@ export default function CampoVerificaCPF() {
   const handleContinue = () => {
     const normalized = normalizeCPF(cpf);
     if (!isValidCPF(normalized)) {
-      toast({ title: "CPF inválido", description: "Por favor, insira um CPF válido.", variant: "destructive" });
+      toast({ title: "CPF inválido", description: "Por favor, insira um CPF válido (11 dígitos).", variant: "destructive" });
       return;
     }
     setPessoaExistente(null);
@@ -76,18 +75,20 @@ export default function CampoVerificaCPF() {
         {!pessoaExistente ? (
           <div className="space-y-4">
             <p className="text-center text-muted-foreground">
-              Digite o CPF do cidadão para verificar se já existe um cadastro.
+              Digite o CPF do cidadão (apenas números) para verificar se já existe um cadastro.
             </p>
             <div className="space-y-2">
               <label htmlFor="cpf" className="text-sm font-medium">CPF do Cidadão</label>
-              <InputMask
-                mask="999.999.999-99"
+              <Input
+                id="cpf"
+                placeholder="00000000000"
+                className="h-12 text-lg text-center"
                 value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
+                onChange={(e) => setCpf(e.target.value.replace(/\D/g, '').slice(0, 11))}
                 disabled={mutation.isPending}
-              >
-                {(inputProps: any) => <Input {...inputProps} id="cpf" placeholder="000.000.000-00" className="h-12 text-lg text-center" />}
-              </InputMask>
+                type="tel"
+                maxLength={11}
+              />
             </div>
             <Button onClick={handleContinue} className="w-full h-12 text-base" disabled={mutation.isPending}>
               {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}

@@ -16,15 +16,14 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import InputMask from "react-input-mask";
 import { Progress } from "@/components/ui/progress";
 
 const schema = z.object({
-  cpf: z.string().refine(val => isValidCPF(normalizeCPF(val)), "CPF inválido"), // Validação usando normalizeCPF
+  cpf: z.string().refine(val => normalizeCPF(val).length === 11 && isValidCPF(normalizeCPF(val)), "CPF inválido (11 dígitos)"), // Validação usando normalizeCPF
   nome: z.string().min(3, "Nome completo é obrigatório"),
   dt_nasc: z.string().min(10, "Data de nascimento é obrigatória"),
   sexo: z.string().min(1, "Sexo é obrigatório"),
-  tel1: z.string().min(10, "Telefone principal é obrigatório"),
+  tel1: z.string().min(8, "Telefone principal é obrigatório"),
   tel2: z.string().optional(),
   email: z.string().email("E-mail inválido").optional().or(z.literal("")),
   cep: z.string().min(8, "CEP é obrigatório"),
@@ -53,16 +52,8 @@ const Step1 = ({ form }: StepProps) => (
   <fieldset className="space-y-4">
     <legend className="text-lg font-medium text-foreground mb-2">Dados Pessoais</legend>
     <div className="space-y-2">
-      <Label htmlFor="cpf">CPF</Label>
-      <Controller
-        name="cpf"
-        control={form.control}
-        render={({ field }) => (
-          <InputMask mask="999.999.999-99" value={field.value} onChange={field.onChange} disabled>
-            {(inputProps: any) => <Input {...inputProps} id="cpf" />}
-          </InputMask>
-        )}
-      />
+      <Label htmlFor="cpf">CPF (apenas números)</Label>
+      <Input id="cpf" {...form.register("cpf")} disabled type="tel" maxLength={11} />
       {form.formState.errors.cpf && <p className="text-sm text-destructive">{form.formState.errors.cpf.message}</p>}
     </div>
     <div className="space-y-2">
@@ -73,15 +64,7 @@ const Step1 = ({ form }: StepProps) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="dt_nasc">Data de Nascimento</Label>
-        <Controller
-          name="dt_nasc"
-          control={form.control}
-          render={({ field }) => (
-            <InputMask mask="99/99/9999" value={field.value} onChange={field.onChange} disabled={false}>
-              {(inputProps: any) => <Input {...inputProps} id="dt_nasc" placeholder="DD/MM/AAAA" />}
-            </InputMask>
-          )}
-        />
+        <Input id="dt_nasc" {...form.register("dt_nasc")} type="date" />
         {form.formState.errors.dt_nasc && <p className="text-sm text-destructive">{form.formState.errors.dt_nasc.message}</p>}
       </div>
       <div className="space-y-2">
@@ -98,29 +81,13 @@ const Step2 = ({ form }: StepProps) => (
     <legend className="text-lg font-medium text-foreground mb-2">Contato</legend>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label htmlFor="tel1">Telefone Principal</Label>
-        <Controller
-          name="tel1"
-          control={form.control}
-          render={({ field }) => (
-            <InputMask mask="(99) 99999-9999" value={field.value} onChange={field.onChange} disabled={false}>
-              {(inputProps: any) => <Input {...inputProps} id="tel1" placeholder="(99) 99999-9999" />}
-            </InputMask>
-          )}
-        />
+        <Label htmlFor="tel1">Telefone Principal (apenas números)</Label>
+        <Input id="tel1" {...form.register("tel1")} type="tel" />
         {form.formState.errors.tel1 && <p className="text-sm text-destructive">{form.formState.errors.tel1.message}</p>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="tel2">Telefone Secundário (Opcional)</Label>
-        <Controller
-          name="tel2"
-          control={form.control}
-          render={({ field }) => (
-            <InputMask mask="(99) 99999-9999" value={field.value || ''} onChange={field.onChange} disabled={false}>
-              {(inputProps: any) => <Input {...inputProps} id="tel2" placeholder="(99) 99999-9999" />}
-            </InputMask>
-          )}
-        />
+        <Label htmlFor="tel2">Telefone Secundário (Opcional, apenas números)</Label>
+        <Input id="tel2" {...form.register("tel2")} type="tel" />
       </div>
     </div>
     <div className="space-y-2">
@@ -137,24 +104,16 @@ const Step3 = ({ form, onCepAutoFill, cepLoading, cepError }: StepProps) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="cep">CEP</Label>
-        <Controller
-          name="cep"
-          control={form.control}
-          render={({ field }) => (
-            <InputMask
-              mask="99999-999"
-              value={field.value}
-              onChange={e => {
-                field.onChange(e);
-                if (onCepAutoFill) onCepAutoFill(e.target.value);
-              }}
-              disabled={cepLoading}
-            >
-              {(inputProps: any) => (
-                <Input {...inputProps} id="cep" placeholder="00000-000" />
-              )}
-            </InputMask>
-          )}
+        <Input
+          id="cep"
+          {...form.register("cep")}
+          onChange={e => {
+            form.setValue("cep", e.target.value);
+            if (onCepAutoFill) onCepAutoFill(e.target.value);
+          }}
+          disabled={cepLoading}
+          type="tel"
+          maxLength={8}
         />
         {cepLoading && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

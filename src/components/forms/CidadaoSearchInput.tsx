@@ -2,12 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, Search, User, MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { cn, normalizeCPF } from "@/lib/utils";
+import { cn, normalizeCPF, isValidCPF } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import InputMask from "react-input-mask";
+import { Label } from "@/components/ui/label"; // Adicionado Label
 
 type PessoaResult = {
   cidadao_id: string;
@@ -85,13 +85,12 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
-    setSearchTerm(rawValue);
-    const normalized = normalizeCPF(rawValue);
+    // Permite apenas dígitos
+    const digitsOnly = rawValue.replace(/\D/g, '');
+    setSearchTerm(digitsOnly);
     
-    if (normalized.length === 11 && isValidCPF(normalized)) {
+    if (digitsOnly.length === 11 && isValidCPF(digitsOnly)) {
       setIsCpfMode(true);
-      // Dispara a busca automática se for um CPF válido e completo
-      // A query hook já lida com a busca
     } else {
       setIsCpfMode(false);
     }
@@ -150,14 +149,15 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
               </div>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <InputMask
-                  mask="999.999.999-99"
+                <Input
+                  placeholder="Buscar por CPF (apenas números)..."
                   value={searchTerm}
                   onChange={handleCpfChange}
+                  className="pl-10"
                   disabled={isSearching}
-                >
-                  {(inputProps: any) => <Input {...inputProps} placeholder="Buscar por CPF..." className="pl-10" />}
-                </InputMask>
+                  type="tel" // Usa type tel para teclado numérico em mobile
+                  maxLength={11}
+                />
               </div>
             </div>
             
