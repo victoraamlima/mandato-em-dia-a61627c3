@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,16 +14,20 @@ import { useSession } from "@/components/auth/SessionContextProvider";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
+import InputMask from "react-input-mask"; // Importar InputMask
+import { isValidCPF, normalizeCPF } from "@/lib/utils"; // Importar utilitários de CPF
 
 const schema = z.object({
   nome: z.string().min(3, "Nome obrigatório"),
-  cpf: z.string().min(11, "CPF obrigatório"),
+  cpf: z.string().refine(val => isValidCPF(normalizeCPF(val)), "CPF inválido"), // Validação de CPF
   dt_nasc: z.string().min(8, "Data de nascimento obrigatória"),
   sexo: z.string().min(1, "Sexo obrigatório"),
   tel1: z.string().min(8, "Telefone obrigatório"),
+  tel2: z.string().optional(), // Adicionado tel2 ao schema
   email: z.string().email("E-mail inválido").optional().or(z.literal("")),
   logradouro: z.string().min(1, "Logradouro obrigatório"),
   numero: z.string().min(1, "Número obrigatório"),
+  complemento: z.string().optional(), // Adicionado complemento ao schema
   bairro: z.string().min(1, "Bairro obrigatório"),
   municipio: z.string().min(1, "Município obrigatório"),
   uf: z.string().min(2, "UF obrigatório"),
@@ -34,6 +38,7 @@ const schema = z.object({
   secao: z.string().optional(),
   municipio_titulo: z.string().optional(),
   uf_titulo: z.string().optional(),
+  observacoes: z.string().optional(), // Adicionado observacoes ao schema
 });
 
 type FormData = z.infer<typeof schema>;
@@ -64,10 +69,10 @@ export default function PessoaForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nome: "", cpf: "", dt_nasc: "", sexo: "", tel1: "", email: "",
-      logradouro: "", numero: "", bairro: "", municipio: "", uf: "", cep: "",
+      nome: "", cpf: "", dt_nasc: "", sexo: "", tel1: "", tel2: "", email: "",
+      logradouro: "", numero: "", complemento: "", bairro: "", municipio: "", uf: "", cep: "",
       consentimento_bool: false,
-      titulo_eleitor: "", zona: "", secao: "", municipio_titulo: "", uf_titulo: "",
+      titulo_eleitor: "", zona: "", secao: "", municipio_titulo: "", uf_titulo: "", observacoes: "",
     },
   });
 
@@ -76,6 +81,9 @@ export default function PessoaForm() {
       form.reset({
         ...existingPessoa,
         email: existingPessoa.email || "",
+        tel2: existingPessoa.tel2 || "",
+        complemento: existingPessoa.complemento || "",
+        observacoes: existingPessoa.observacoes || "",
         dt_nasc: existingPessoa.dt_nasc ? existingPessoa.dt_nasc.split('T')[0] : "",
         titulo_eleitor: existingPessoa.titulo_eleitor || "",
         zona: existingPessoa.zona || "",
@@ -92,13 +100,15 @@ export default function PessoaForm() {
 
       const payload = {
         nome: data.nome,
-        cpf: data.cpf,
+        cpf: normalizeCPF(data.cpf), // Normaliza o CPF antes de salvar
         dt_nasc: data.dt_nasc,
         sexo: data.sexo,
         tel1: data.tel1,
+        tel2: data.tel2 || null,
         email: data.email || null,
         logradouro: data.logradouro,
         numero: data.numero,
+        complemento: data.complemento || null,
         bairro: data.bairro,
         municipio: data.municipio,
         uf: data.uf,
@@ -109,6 +119,7 @@ export default function PessoaForm() {
         secao: data.secao || null,
         municipio_titulo: data.municipio_titulo || null,
         uf_titulo: data.uf_titulo || null,
+        observacoes: data.observacoes || null,
       };
 
       if (isEditing) {
@@ -162,7 +173,15 @@ export default function PessoaForm() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                       <Label htmlFor="cpf">CPF</Label>
-                      <Input id="cpf" {...form.register("cpf")} />
+                      <Controller
+                        name="cpf"
+                        control={form.control}
+                        render={({ field }) => (
+                          <InputMask mask="999.999.999-99" value={field.value} onChange={field.onChange}>
+                            {(inputProps: any) => <Input {...inputProps} id="cpf" />}
+                          </InputMask>
+                        )}
+                      />
                       {form.formState.errors.cpf && <p className="text-sm text-destructive">{form.formState.errors.cpf.message}</p>}
                   </div>
                   <div className="space-y-2">
@@ -183,14 +202,34 @@ export default function PessoaForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="tel1">Telefone Principal</Label>
-                    <Input id="tel1" {...form.register("tel1")} />
+                    <Controller
+                        name="tel1"
+                        control={form.control}
+                        render={({ field }) => (
+                            <InputMask mask="(99) 99999-9999" value={field.value} onChange={field.onChange}>
+                                {(inputProps: any) => <Input {...inputProps} id="tel1" />}
+                            </InputMask>
+                        )}
+                    />
                     {form.formState.errors.tel1 && <p className="text-sm text-destructive">{form.formState.errors.tel1.message}</p>}
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="email">E-mail (opcional)</Label>
-                    <Input id="email" type="email" {...form.register("email")} />
-                    {form.formState.errors.email && <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>}
+                    <Label htmlFor="tel2">Telefone Secundário (Opcional)</Label>
+                    <Controller
+                        name="tel2"
+                        control={form.control}
+                        render={({ field }) => (
+                            <InputMask mask="(99) 99999-9999" value={field.value || ''} onChange={field.onChange}>
+                                {(inputProps: any) => <Input {...inputProps} id="tel2" />}
+                            </InputMask>
+                        )}
+                    />
                 </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="email">E-mail (opcional)</Label>
+                  <Input id="email" type="email" {...form.register("email")} />
+                  {form.formState.errors.email && <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>}
               </div>
             </fieldset>
 
@@ -207,6 +246,10 @@ export default function PessoaForm() {
                     <Input id="numero" {...form.register("numero")} />
                     {form.formState.errors.numero && <p className="text-sm text-destructive">{form.formState.errors.numero.message}</p>}
                 </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="complemento">Complemento (Opcional)</Label>
+                  <Input id="complemento" {...form.register("complemento")} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -261,6 +304,11 @@ export default function PessoaForm() {
                 </div>
               </div>
             </fieldset>
+            
+            <div className="space-y-2">
+                <Label htmlFor="observacoes">Observações (Opcional)</Label>
+                <Textarea id="observacoes" {...form.register("observacoes")} />
+            </div>
 
             <div className="flex items-center space-x-2 pt-4 border-t">
               <Checkbox id="consentimento_bool" onCheckedChange={(checked) => form.setValue('consentimento_bool', !!checked)} checked={form.watch('consentimento_bool')} />

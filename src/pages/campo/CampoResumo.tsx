@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { maskCpf } from "@/lib/utils";
+import { maskCpf, maskPhone } from "@/lib/utils"; // Importar maskPhone
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +67,7 @@ export default function CampoResumo() {
       <CardContent className="space-y-4">
         <InfoItem icon={User} label="CPF" value={maskCpf(data.cpf)} />
         <InfoItem icon={MapPin} label="Localização" value={`${data.municipio}/${data.uf}`} />
-        <InfoItem icon={Phone} label="Telefone" value={data.tel1} />
+        <InfoItem icon={Phone} label="Telefone" value={maskPhone(data.tel1)} />
         <InfoItem icon={FileText} label="Título Eleitoral" value={data.titulo_eleitor ? `Zona: ${data.zona} / Seção: ${data.secao}` : "Não informado"} />
         <InfoItem icon={UserCheck} label="Cadastrado por" value={data.colaborador?.nome} />
         <InfoItem icon={Calendar} label="Data do Cadastro" value={new Date(data.created_at).toLocaleString('pt-BR')} />

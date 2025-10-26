@@ -32,23 +32,9 @@ import {
   Mail,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskCpf, maskPhone, normalizeCPF } from "@/lib/utils"; // Importar maskPhone e normalizeCPF
 
 const PAGE_SIZE = 10;
-
-function maskCpf(cpf: string) {
-  if (!cpf) return "";
-  // Exibe apenas os 3 primeiros e 2 últimos dígitos
-  return cpf.replace(/^(\d{3})\d{6}(\d{2})$/, "$1.***.***-$2");
-}
-
-function maskPhone(phone: string) {
-  if (!phone) return "";
-  // Exibe apenas os 4 últimos dígitos
-  return phone.replace(/(\d{0,2})(\d{0,5})(\d{0,4})/, function (_, ddd, prefix, suffix) {
-    if (!suffix) return `(${ddd}) ${prefix}`;
-    return `(${ddd}) *****-${suffix}`;
-  });
-}
 
 type PessoaListItem = {
   cidadao_id: string;
@@ -106,7 +92,7 @@ export default function Pessoas() {
 
       // Filtros
       if (searchTerm) {
-        const normalized = searchTerm.replace(/\D/g, "");
+        const normalized = normalizeCPF(searchTerm);
         query = query.or(
           [
             `nome.ilike.%${searchTerm}%`,

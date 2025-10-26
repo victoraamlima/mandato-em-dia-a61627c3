@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User, Mail, Phone, MapPin, Edit, ArrowLeft, Ticket as TicketIcon, FileText, CheckSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { maskCpf, maskPhone } from "@/lib/utils"; // Importar maskCpf e maskPhone
 
 const fetchPessoa = async (id: string) => {
   const { data, error } = await supabase
@@ -90,7 +91,7 @@ export default function PessoaDetalhes() {
         <Card className="card-institutional">
           <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-5 h-5 text-primary" /> Dados Pessoais</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <InfoItem label="CPF" value={pessoa.cpf} />
+            <InfoItem label="CPF" value={maskCpf(pessoa.cpf)} />
             <InfoItem label="Data de Nascimento" value={new Date(pessoa.dt_nasc).toLocaleDateString('pt-BR')} />
             <InfoItem label="Sexo" value={pessoa.sexo} />
           </CardContent>
@@ -98,8 +99,8 @@ export default function PessoaDetalhes() {
         <Card className="card-institutional">
           <CardHeader><CardTitle className="flex items-center gap-2"><Phone className="w-5 h-5 text-primary" /> Contato</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <InfoItem label="Telefone Principal" value={pessoa.tel1} />
-            <InfoItem label="Telefone Secundário" value={pessoa.tel2} />
+            <InfoItem label="Telefone Principal" value={maskPhone(pessoa.tel1)} />
+            <InfoItem label="Telefone Secundário" value={pessoa.tel2 ? maskPhone(pessoa.tel2) : null} />
             <InfoItem label="Email" value={pessoa.email} />
           </CardContent>
         </Card>

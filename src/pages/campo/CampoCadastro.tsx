@@ -20,7 +20,7 @@ import InputMask from "react-input-mask";
 import { Progress } from "@/components/ui/progress";
 
 const schema = z.object({
-  cpf: z.string().refine(isValidCPF, "CPF inválido"),
+  cpf: z.string().refine(val => isValidCPF(normalizeCPF(val)), "CPF inválido"), // Validação usando normalizeCPF
   nome: z.string().min(3, "Nome completo é obrigatório"),
   dt_nasc: z.string().min(10, "Data de nascimento é obrigatória"),
   sexo: z.string().min(1, "Sexo é obrigatório"),
@@ -54,7 +54,15 @@ const Step1 = ({ form }: StepProps) => (
     <legend className="text-lg font-medium text-foreground mb-2">Dados Pessoais</legend>
     <div className="space-y-2">
       <Label htmlFor="cpf">CPF</Label>
-      <Input id="cpf" {...form.register("cpf")} disabled />
+      <Controller
+        name="cpf"
+        control={form.control}
+        render={({ field }) => (
+          <InputMask mask="999.999.999-99" value={field.value} onChange={field.onChange} disabled>
+            {(inputProps: any) => <Input {...inputProps} id="cpf" />}
+          </InputMask>
+        )}
+      />
       {form.formState.errors.cpf && <p className="text-sm text-destructive">{form.formState.errors.cpf.message}</p>}
     </div>
     <div className="space-y-2">
@@ -285,6 +293,8 @@ export default function CampoCadastro() {
       toast({ title: "CPF não fornecido", description: "Volte e verifique o CPF primeiro.", variant: "destructive" });
       navigate("/campo");
     }
+    // Preenche o CPF inicial no formulário
+    form.setValue("cpf", cpfParam);
   }, [cpfParam, navigate]);
 
   // Função para buscar endereço pelo CEP
@@ -325,7 +335,9 @@ export default function CampoCadastro() {
 
       const payload: TablesInsert<'pessoa'> = {
         cpf: normalizedCpf, nome: data.nome, dt_nasc: data.dt_nasc, sexo: data.sexo,
-        tel1: data.tel1, tel2: data.tel2 || null, email: data.email || null,
+        tel1: normalizeCPF(data.tel1), // Normaliza o telefone
+        tel2: data.tel2 ? normalizeCPF(data.tel2) : null, // Normaliza o telefone
+        email: data.email || null,
         cep: data.cep, logradouro: data.logradouro, numero: data.numero,
         complemento: data.complemento || null, bairro: data.bairro, municipio: data.municipio, uf: data.uf,
         titulo_eleitor: data.titulo_eleitor || null, zona: data.zona || null, secao: data.secao || null,
