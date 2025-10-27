@@ -129,12 +129,12 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
-          <Command shouldFilter={!isCpfSearch}> {/* Desabilita o filtro local se for busca por CPF */}
+          <Command shouldFilter={!isCpfSearch}>
+            {/* Removido disabled={isSearching} para permitir digitação contínua */}
             <CommandInput 
                 placeholder="Buscar por nome ou CPF (apenas números)..." 
                 value={searchTerm}
                 onValueChange={setSearchTerm}
-                disabled={isSearching}
             />
             
             <CommandList>
