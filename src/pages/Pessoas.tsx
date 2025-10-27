@@ -32,7 +32,7 @@ import {
   Mail,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { maskCpf, maskPhone, normalizeCPF } from "@/lib/utils"; // Importar maskPhone e normalizeCPF
+import { maskPhone, normalizeCPF } from "@/lib/utils"; // Removendo maskCpf
 
 const PAGE_SIZE = 10;
 
@@ -267,7 +267,7 @@ export default function Pessoas() {
                         {pessoa.nome}
                       </TableCell>
                       <TableCell className="font-mono text-sm">
-                        {maskCpf(pessoa.cpf)}
+                        {pessoa.cpf}
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
