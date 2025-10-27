@@ -1,0 +1,1 @@
+ALTER TABLE public.evento ALTER COLUMN local DROP NOT NULL;

@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ArrowLeft, Edit, User, Clock, MapPin, Info, UserPlus, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, differenceInMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CidadaoSearchInput } from "@/components/forms/CidadaoSearchInput";
 
@@ -86,6 +86,16 @@ export default function AtendimentoDeputadoDetalhes() {
   if (isLoading) return <Skeleton className="h-screen w-full" />;
   if (isError || !evento) return <div className="text-center text-destructive">Erro ao carregar atendimento.</div>;
 
+  const duracaoEmMinutos = differenceInMinutes(new Date(evento.fim), new Date(evento.inicio));
+  const formatarDuracao = (minutos: number) => {
+    if (minutos < 60) return `${minutos} min`;
+    const horas = Math.floor(minutos / 60);
+    const mins = minutos % 60;
+    if (mins === 0) return `${horas}h`;
+    return `${horas}h ${mins}min`;
+  };
+  const duracaoFormatada = formatarDuracao(duracaoEmMinutos);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -99,7 +109,7 @@ export default function AtendimentoDeputadoDetalhes() {
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InfoItem label="Status" value={<Badge className={evento.status === 'Agendado' ? 'status-aberto' : 'status-concluido'}>{evento.status}</Badge>} />
           <InfoItem label="Início" value={format(new Date(evento.inicio), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} />
-          <InfoItem label="Término" value={format(new Date(evento.fim), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} />
+          <InfoItem label="Duração" value={duracaoFormatada} />
           <InfoItem label="Local" value={evento.local} />
           <div className="md:col-span-3">
             <InfoItem label="Descrição" value={evento.descricao} />

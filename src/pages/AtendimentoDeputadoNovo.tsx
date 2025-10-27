@@ -10,16 +10,15 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { addMinutes } from "date-fns";
 
 const schema = z.object({
   titulo: z.string().min(3, "Assunto é obrigatório"),
   inicio: z.string().min(1, "Data/hora de início é obrigatória"),
-  fim: z.string().min(1, "Término é obrigatório"),
-  local: z.string().min(1, "Local é obrigatório"),
+  duracao: z.coerce.number().positive("Selecione uma duração"),
+  local: z.string().optional(),
   descricao: z.string().optional(),
-}).refine(data => new Date(data.fim) > new Date(data.inicio), {
-  message: "O término deve ser após o início.",
-  path: ["fim"],
 });
 
 type FormData = z.infer<typeof schema>;
@@ -31,7 +30,6 @@ export default function AtendimentoDeputadoNovo() {
     defaultValues: {
       titulo: "",
       inicio: "",
-      fim: "",
       local: "",
       descricao: "",
     },
@@ -39,14 +37,17 @@ export default function AtendimentoDeputadoNovo() {
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
+      const inicioDate = new Date(data.inicio);
+      const fimDate = addMinutes(inicioDate, data.duracao);
+
       const { error, data: evento } = await supabase
         .from("evento")
         .insert([
           {
             titulo: data.titulo,
-            inicio: new Date(data.inicio).toISOString(),
-            fim: new Date(data.fim).toISOString(),
-            local: data.local,
+            inicio: inicioDate.toISOString(),
+            fim: fimDate.toISOString(),
+            local: data.local || null,
             descricao: data.descricao,
             is_atendimento_deputado: true,
             status: "Agendado",
@@ -104,11 +105,25 @@ export default function AtendimentoDeputadoNovo() {
                 />
                 <FormField
                   control={form.control}
-                  name="fim"
+                  name="duracao"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Término</FormLabel>
-                      <FormControl><Input type="datetime-local" {...field} /></FormControl>
+                      <FormLabel>Duração</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a duração" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="15">15 minutos</SelectItem>
+                          <SelectItem value="30">30 minutos</SelectItem>
+                          <SelectItem value="45">45 minutos</SelectItem>
+                          <SelectItem value="60">1 hora</SelectItem>
+                          <SelectItem value="90">1 hora e 30 min</SelectItem>
+                          <SelectItem value="120">2 horas</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -119,7 +134,7 @@ export default function AtendimentoDeputadoNovo() {
                 name="local"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Local</FormLabel>
+                    <FormLabel>Local (Opcional)</FormLabel>
                     <FormControl><Input {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -130,7 +145,7 @@ export default function AtendimentoDeputadoNovo() {
                 name="descricao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Resumo (opcional)</FormLabel>
+                    <FormLabel>Resumo (Opcional)</FormLabel>
                     <FormControl><Textarea {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
