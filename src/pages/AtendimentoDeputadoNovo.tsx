@@ -8,14 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { formatISO } from "date-fns";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 
 const schema = z.object({
-  titulo: z.string().min(3, "Assunto obrigatório"),
-  inicio: z.string().min(1, "Data/hora de início obrigatória"),
-  fim: z.string().min(1, "Término obrigatório"),
-  local: z.string().min(1, "Local obrigatório"),
+  titulo: z.string().min(3, "Assunto é obrigatório"),
+  inicio: z.string().min(1, "Data/hora de início é obrigatória"),
+  fim: z.string().min(1, "Término é obrigatório"),
+  local: z.string().min(1, "Local é obrigatório"),
   descricao: z.string().optional(),
+}).refine(data => new Date(data.fim) > new Date(data.inicio), {
+  message: "O término deve ser após o início.",
+  path: ["fim"],
 });
 
 type FormData = z.infer<typeof schema>;
@@ -35,16 +39,13 @@ export default function AtendimentoDeputadoNovo() {
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
-      if (new Date(data.fim) <= new Date(data.inicio)) {
-        throw new Error("O término deve ser após o início.");
-      }
       const { error, data: evento } = await supabase
         .from("evento")
         .insert([
           {
             titulo: data.titulo,
-            inicio: formatISO(new Date(data.inicio)),
-            fim: formatISO(new Date(data.fim)),
+            inicio: new Date(data.inicio).toISOString(),
+            fim: new Date(data.fim).toISOString(),
             local: data.local,
             descricao: data.descricao,
             is_atendimento_deputado: true,
@@ -56,35 +57,90 @@ export default function AtendimentoDeputadoNovo() {
       if (error) throw error;
       return evento;
     },
-    onSuccess: (evento) => {
+    onSuccess: (data) => {
       toast({ title: "Atendimento criado com sucesso!" });
-      navigate(`/atendimentos-deputado/${evento.evento_id}`);
+      navigate(`/atendimentos-deputado/${data.evento_id}`);
     },
     onError: (err: any) => {
       toast({ title: "Erro ao criar atendimento", description: err.message, variant: "destructive" });
     },
   });
 
+  const onSubmit = (data: FormData) => {
+    mutation.mutate(data);
+  };
+
   return (
-    <div className="max-w-xl mx-auto animate-fade-in">
+    <div className="max-w-2xl mx-auto animate-fade-in">
       <Card className="card-institutional">
         <CardHeader>
           <CardTitle>Novo Atendimento do Deputado</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-          >
-            <Input label="Assunto" {...form.register("titulo")} error={form.formState.errors.titulo?.message} />
-            <Input label="Data/hora de início" type="datetime-local" {...form.register("inicio")} error={form.formState.errors.inicio?.message} />
-            <Input label="Término" type="datetime-local" {...form.register("fim")} error={form.formState.errors.fim?.message} />
-            <Input label="Local" {...form.register("local")} error={form.formState.errors.local?.message} />
-            <Input label="Resumo (opcional)" {...form.register("descricao")} error={form.formState.errors.descricao?.message} />
-            <Button type="submit" className="w-full" disabled={mutation.isPending}>
-              {mutation.isPending ? "Salvando..." : "Criar atendimento"}
-            </Button>
-          </form>
+          <Form {...form}>
+            <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+              <FormField
+                control={form.control}
+                name="titulo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assunto</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="inicio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data/hora de início</FormLabel>
+                      <FormControl><Input type="datetime-local" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="fim"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Término</FormLabel>
+                      <FormControl><Input type="datetime-local" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="local"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Local</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="descricao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Resumo (opcional)</FormLabel>
+                    <FormControl><Textarea {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={mutation.isPending}>
+                {mutation.isPending ? "Salvando..." : "Criar atendimento"}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

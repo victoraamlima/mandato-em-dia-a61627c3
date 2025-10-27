@@ -13,6 +13,7 @@ import PessoaForm from "./pages/PessoaForm";
 import TicketForm from "./pages/TicketForm";
 import AtendimentosDeputado from "./pages/AtendimentosDeputado";
 import AtendimentoDeputadoNovo from "./pages/AtendimentoDeputadoNovo";
+import AtendimentoDeputadoDetalhes from "./pages/AtendimentoDeputadoDetalhes"; // Importação da nova página
 import { SessionContextProvider } from "@/components/auth/SessionContextProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import PessoaDetalhes from "./pages/PessoaDetalhes";
@@ -93,6 +94,8 @@ const App = () => (
 
             <Route path="/atendimentos-deputado" element={<ProtectedRoute scope="backoffice"><AppLayout><AtendimentosDeputado /></AppLayout></ProtectedRoute>} />
             <Route path="/atendimentos-deputado/novo" element={<ProtectedRoute scope="backoffice"><AppLayout><AtendimentoDeputadoNovo /></AppLayout></ProtectedRoute>} />
+            <Route path="/atendimentos-deputado/:id" element={<ProtectedRoute scope="backoffice"><AppLayout><AtendimentoDeputadoDetalhes /></AppLayout></ProtectedRoute>} />
+            
             <Route path="/agenda" element={<ProtectedRoute scope="backoffice"><AppLayout><Agenda /></AppLayout></ProtectedRoute>} />
             <Route path="/cohab" element={<ProtectedRoute scope="backoffice"><AppLayout><Cohab /></AppLayout></ProtectedRoute>} />
 
