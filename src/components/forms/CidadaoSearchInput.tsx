@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, MapPin, Loader2, AlertTriangle } from "lucide-react";
+import { Check, ChevronsUpDown, MapPin, Loader2, AlertTriangle, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn, normalizeCPF, isValidCPF } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom"; // Importar Link para navegação
 
 type PessoaResult = {
   cidadao_id: string;
@@ -109,6 +110,15 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
     }
   }, [isCpfSearch, isSearching, searchResults]);
 
+  // Determina o link para o cadastro de nova pessoa
+  const newPersonLink = useMemo(() => {
+    const cpf = normalizeCPF(searchTerm);
+    if (cpf.length === 11) {
+      return `/pessoas/nova?cpf=${cpf}`;
+    }
+    return "/pessoas/nova";
+  }, [searchTerm]);
+
 
   return (
     <div className="space-y-2">
@@ -130,7 +140,6 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
           <Command shouldFilter={!isCpfSearch}>
-            {/* Removido disabled={isSearching} para permitir digitação contínua */}
             <CommandInput 
                 placeholder="Buscar por nome ou CPF (apenas números)..." 
                 value={searchTerm}
@@ -152,7 +161,17 @@ export function CidadaoSearchInput({ value, onChange, disabled }: CidadaoSearchI
                   </div>
                 </CommandEmpty>
               ) : searchResults?.length === 0 ? (
-                <CommandEmpty>Nenhum cidadão encontrado.</CommandEmpty>
+                <CommandEmpty>
+                  <div className="flex flex-col items-center justify-center py-4 text-muted-foreground">
+                    <p className="mb-2">Nenhum cidadão encontrado.</p>
+                    <Button asChild size="sm" className="bg-primary hover:bg-primary-hover">
+                        <Link to={newPersonLink} onClick={() => setOpen(false)}>
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            Cadastrar Nova Pessoa
+                        </Link>
+                    </Button>
+                  </div>
+                </CommandEmpty>
               ) : (
                 <CommandGroup>
                   {searchResults?.map((pessoa) => (

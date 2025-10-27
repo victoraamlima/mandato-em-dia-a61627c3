@@ -3,7 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,10 +55,13 @@ const fetchPessoa = async (id: string): Promise<Tables<'pessoa'>> => {
 
 export default function PessoaForm() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams(); // Hook para ler parâmetros da URL
   const isEditing = !!id;
   const navigate = useNavigate();
   const { user } = useSession();
   const queryClient = useQueryClient();
+  
+  const cpfParam = searchParams.get("cpf"); // Lê o CPF do parâmetro da URL
 
   const { data: existingPessoa, isLoading } = useQuery({
     queryKey: ["pessoa", id],
@@ -69,7 +72,9 @@ export default function PessoaForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nome: "", cpf: "", dt_nasc: "", sexo: "", tel1: "", tel2: "", email: "",
+      nome: "", 
+      cpf: cpfParam || "", // Usa o CPF do parâmetro se existir
+      dt_nasc: "", sexo: "", tel1: "", tel2: "", email: "",
       logradouro: "", numero: "", complemento: "", bairro: "", municipio: "", uf: "", cep: "",
       consentimento_bool: false,
       titulo_eleitor: "", zona: "", secao: "", municipio_titulo: "", uf_titulo: "", observacoes: "",
@@ -91,8 +96,11 @@ export default function PessoaForm() {
         municipio_titulo: existingPessoa.municipio_titulo || "",
         uf_titulo: existingPessoa.uf_titulo || "",
       });
+    } else if (cpfParam) {
+        // Se não estiver editando e houver CPF na URL, garante que o campo CPF seja preenchido
+        form.setValue("cpf", cpfParam);
     }
-  }, [existingPessoa, form]);
+  }, [existingPessoa, form, cpfParam]);
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
