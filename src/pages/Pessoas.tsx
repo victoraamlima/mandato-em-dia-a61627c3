@@ -221,6 +221,7 @@ export default function Pessoas() {
       <ResponsiveTable
         columns={columns}
         data={filteredPessoas}
+        rowKey="cidadao_id"
         isLoading={isLoading}
         isError={isError}
         renderMobileCard={renderMobileCard}

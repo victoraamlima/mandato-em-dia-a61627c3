@@ -103,8 +103,8 @@ export default function Tickets() {
         <ActionsDropdown item={item} />
       </div>
       <div className="text-sm text-muted-foreground space-y-1">
-        <p>Categoria: <Badge variant="secondary" className="text-xs">{item.categoria}</Badge></p>
-        <p>Status: <Badge className={item.status === "Aberto" ? "status-aberto" : "status-concluido"}>{item.status}</Badge></p>
+        <div>Categoria: <Badge variant="secondary" className="text-xs">{item.categoria}</Badge></div>
+        <div>Status: <Badge className={item.status === "Aberto" ? "status-aberto" : "status-concluido"}>{item.status}</Badge></div>
       </div>
     </div>
   );
@@ -156,6 +156,7 @@ export default function Tickets() {
       <ResponsiveTable
         columns={columns}
         data={filteredTickets}
+        rowKey="ticket_id"
         isLoading={isLoading}
         isError={isError}
         renderMobileCard={renderMobileCard}

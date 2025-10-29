@@ -253,6 +253,7 @@ export default function Dashboard() {
           <ResponsiveTable
             columns={ticketColumns}
             data={recentTickets ?? []}
+            rowKey="ticket_id"
             isLoading={loadingRecent}
             isError={errorRecent}
             renderMobileCard={renderMobileTicketCard}

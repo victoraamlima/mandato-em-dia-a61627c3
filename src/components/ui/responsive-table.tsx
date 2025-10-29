@@ -21,6 +21,7 @@ interface ResponsiveTableProps<T> {
   data: T[];
   columns: Column<T>[];
   renderMobileCard: (item: T) => React.ReactNode;
+  rowKey: keyof T;
   isLoading?: boolean;
   isError?: boolean;
   noResultsMessage?: string;
@@ -31,6 +32,7 @@ export function ResponsiveTable<T extends { [key: string]: any }>({
   data,
   columns,
   renderMobileCard,
+  rowKey,
   isLoading = false,
   isError = false,
   noResultsMessage = "Nenhum resultado encontrado.",
@@ -100,8 +102,8 @@ export function ResponsiveTable<T extends { [key: string]: any }>({
   if (isMobile) {
     return (
       <div className="space-y-3">
-        {data.map((item, index) => (
-          <Card key={item.cidadao_id || item.ticket_id || item.id || index} className="card-institutional">
+        {data.map((item) => (
+          <Card key={item[rowKey]} className="card-institutional">
             <CardContent className="p-4">
               {renderMobileCard(item)}
             </CardContent>
@@ -126,8 +128,8 @@ export function ResponsiveTable<T extends { [key: string]: any }>({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((item, i) => (
-                <TableRow key={item.cidadao_id || item.ticket_id || item.id || i} className="hover:bg-surface-hover transition-colors">
+              {data.map((item) => (
+                <TableRow key={item[rowKey]} className="hover:bg-surface-hover transition-colors">
                   {columns.map((col, j) => (
                     <TableCell key={j} className={col.className}>
                       {renderCell(item, col)}
