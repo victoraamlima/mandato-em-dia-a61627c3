@@ -1,3 +1,5 @@
+"use client";
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,7 +27,8 @@ import Configuracoes from "./pages/Configuracoes";
 import Agenda from "./pages/Agenda";
 import Financeiro from "./pages/Financeiro";
 import Cohab from "./pages/Cohab";
-import ConviteNovo from "./pages/ConviteNovo"; // Importação da nova página
+import ConviteNovo from "./pages/ConviteNovo";
+import ConvitesList from "./pages/ConvitesList";
 
 // Rotas do Módulo de Campo
 import CampoLogin from "./pages/campo/CampoLogin";
@@ -106,6 +109,7 @@ const App = () => (
             <Route path="/usuarios/novo" element={<ProtectedRoute scope="backoffice"><AppLayout><UsuarioForm /></AppLayout></ProtectedRoute>} />
             <Route path="/usuarios/:id/editar" element={<ProtectedRoute scope="backoffice"><AppLayout><UsuarioForm /></AppLayout></ProtectedRoute>} />
             <Route path="/usuarios/convites/novo" element={<ProtectedRoute scope="backoffice"><AppLayout><ConviteNovo /></AppLayout></ProtectedRoute>} />
+            <Route path="/usuarios/convites" element={<ProtectedRoute scope="backoffice"><AppLayout><ConvitesList /></AppLayout></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute scope="backoffice"><AppLayout><Configuracoes /></AppLayout></ProtectedRoute>} />
 
             {/* Rota de fallback */}
