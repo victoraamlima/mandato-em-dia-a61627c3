@@ -52,6 +52,12 @@ export function AppSidebar() {
       ? "bg-primary text-primary-foreground font-medium" 
       : "hover:bg-surface-hover text-muted-foreground hover:text-foreground";
 
+  const getNavLinkClasses = (isActive: boolean) => `
+    flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-200
+    ${getNavClass({ isActive })}
+    ${isCollapsed ? 'justify-center w-10 h-10 mx-auto' : 'justify-start'}
+  `;
+
   return (
     <Sidebar className={isCollapsed ? "w-16" : "w-64"} collapsible="icon">
       <SidebarContent className="bg-surface border-r border-border">
@@ -83,10 +89,7 @@ export function AppSidebar() {
                     <NavLink 
                       to={item.url} 
                       end 
-                      className={({ isActive }) => `
-                        flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-200
-                        ${getNavClass({ isActive })}
-                      `}
+                      className={({ isActive }) => getNavLinkClasses(isActive)}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
                       {!isCollapsed && <span>{item.title}</span>}
@@ -110,10 +113,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
-                      className={({ isActive }) => `
-                        flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-200
-                        ${getNavClass({ isActive })}
-                      `}
+                      className={({ isActive }) => getNavLinkClasses(isActive)}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
                       {!isCollapsed && <span>{item.title}</span>}
