@@ -42,6 +42,15 @@ export default function ConviteSignup() {
 
   const signupMutation = useMutation({
     mutationFn: async (values: FormData) => {
+      // Antes de iniciar o fluxo, salvamos o token para que possamos marcá-lo depois (caso o fluxo exija confirmação por e-mail)
+      if (token) {
+        try {
+          localStorage.setItem("convite_token", token);
+        } catch (e) {
+          // ignore storage errors
+        }
+      }
+
       // Inclui o perfil do convite na metadata
       const options: any = {
         data: {
@@ -56,7 +65,11 @@ export default function ConviteSignup() {
         options,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Caso haja falha no signup, limpamos o token pendente
+        try { localStorage.removeItem("convite_token"); } catch (e) {}
+        throw error;
+      }
       return data;
     },
   });
@@ -93,9 +106,11 @@ export default function ConviteSignup() {
       const session = res.session ?? (await supabase.auth.getSession()).data.session;
       if (session && session.user) {
         try {
-          await markUsedMutation.mutateAsync(token!);
+          if (token) {
+            await markUsedMutation.mutateAsync(token);
+            try { localStorage.removeItem("convite_token"); } catch (e) {}
+          }
         } catch (err: any) {
-          // Se não conseguir marcar por RLS/perm, apenas avisamos — não bloqueamos o fluxo
           console.warn("Não foi possível marcar convite como usado automaticamente:", err?.message ?? err);
         }
       } else {
