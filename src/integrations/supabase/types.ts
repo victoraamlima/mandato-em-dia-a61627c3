@@ -47,6 +47,57 @@ export type Database = {
         }
         Relationships: []
       }
+      convite: {
+        Row: {
+          convite_id: string
+          created_at: string | null
+          criado_por: string | null
+          perfil: string
+          status: string
+          token: string
+          uso_unico: boolean
+          usado_em: string | null
+          usado_por: string | null
+        }
+        Insert: {
+          convite_id?: string
+          created_at?: string | null
+          criado_por?: string | null
+          perfil: string
+          status?: string
+          token: string
+          uso_unico?: boolean
+          usado_em?: string | null
+          usado_por?: string | null
+        }
+        Update: {
+          convite_id?: string
+          created_at?: string | null
+          criado_por?: string | null
+          perfil?: string
+          status?: string
+          token?: string
+          uso_unico?: boolean
+          usado_em?: string | null
+          usado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convite_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["usuario_id"]
+          },
+          {
+            foreignKeyName: "convite_usado_por_fkey"
+            columns: ["usado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evento: {
         Row: {
           created_at: string
@@ -57,7 +108,7 @@ export type Database = {
           is_atendimento_deputado: boolean
           lat: number | null
           lng: number | null
-          local: string
+          local: string | null
           status: string | null
           tipo: string | null
           titulo: string
@@ -72,7 +123,7 @@ export type Database = {
           is_atendimento_deputado?: boolean
           lat?: number | null
           lng?: number | null
-          local: string
+          local?: string | null
           status?: string | null
           tipo?: string | null
           titulo: string
@@ -87,7 +138,7 @@ export type Database = {
           is_atendimento_deputado?: boolean
           lat?: number | null
           lng?: number | null
-          local?: string
+          local?: string | null
           status?: string | null
           tipo?: string | null
           titulo?: string

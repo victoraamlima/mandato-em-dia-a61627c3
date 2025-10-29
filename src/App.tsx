@@ -13,7 +13,7 @@ import PessoaForm from "./pages/PessoaForm";
 import TicketForm from "./pages/TicketForm";
 import AtendimentosDeputado from "./pages/AtendimentosDeputado";
 import AtendimentoDeputadoNovo from "./pages/AtendimentoDeputadoNovo";
-import AtendimentoDeputadoDetalhes from "./pages/AtendimentoDeputadoDetalhes"; // Importação da nova página
+import AtendimentoDeputadoDetalhes from "./pages/AtendimentoDeputadoDetalhes";
 import { SessionContextProvider } from "@/components/auth/SessionContextProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import PessoaDetalhes from "./pages/PessoaDetalhes";
@@ -25,6 +25,7 @@ import Configuracoes from "./pages/Configuracoes";
 import Agenda from "./pages/Agenda";
 import Financeiro from "./pages/Financeiro";
 import Cohab from "./pages/Cohab";
+import ConviteNovo from "./pages/ConviteNovo"; // Importação da nova página
 
 // Rotas do Módulo de Campo
 import CampoLogin from "./pages/campo/CampoLogin";
@@ -104,6 +105,7 @@ const App = () => (
             <Route path="/usuarios" element={<ProtectedRoute scope="backoffice"><AppLayout><Usuarios /></AppLayout></ProtectedRoute>} />
             <Route path="/usuarios/novo" element={<ProtectedRoute scope="backoffice"><AppLayout><UsuarioForm /></AppLayout></ProtectedRoute>} />
             <Route path="/usuarios/:id/editar" element={<ProtectedRoute scope="backoffice"><AppLayout><UsuarioForm /></AppLayout></ProtectedRoute>} />
+            <Route path="/usuarios/convites/novo" element={<ProtectedRoute scope="backoffice"><AppLayout><ConviteNovo /></AppLayout></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute scope="backoffice"><AppLayout><Configuracoes /></AppLayout></ProtectedRoute>} />
 
             {/* Rota de fallback */}
