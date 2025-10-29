@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -11,14 +12,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Bell, User, LogOut, Settings, Users as UsersIcon, Ticket as TicketIcon, CalendarDays } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Search, Plus, Bell, User, LogOut, Settings, Users as UsersIcon, Ticket as TicketIcon, CalendarDays, Menu } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SidebarNavigation } from "./SidebarNavigation";
 
 export function AppHeader() {
   const { user, isLoading } = useUser();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -30,11 +34,24 @@ export function AppHeader() {
   };
 
   return (
-    <header className="border-b border-border bg-surface h-16 flex items-center justify-between px-6">
+    <header className="border-b border-border bg-surface h-16 flex items-center justify-between px-4 sm:px-6">
       <div className="flex items-center gap-4">
-        <SidebarTrigger className="p-2 hover:bg-surface-hover rounded-md" />
+        {/* Gatilho da Sidebar para Desktop */}
+        <SidebarTrigger className="hidden md:flex p-2 hover:bg-surface-hover rounded-md" />
         
-        <div className="relative">
+        {/* Gatilho do Menu Gaveta para Mobile */}
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-64">
+            <SidebarNavigation onLinkClick={() => setIsMobileMenuOpen(false)} />
+          </SheetContent>
+        </Sheet>
+        
+        <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Buscar pessoas, CPF, tickets..."
@@ -43,12 +60,12 @@ export function AppHeader() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="sm" className="bg-primary hover:bg-primary-hover text-primary-foreground">
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar
+              <Plus className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Adicionar</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
@@ -74,9 +91,9 @@ export function AppHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button variant="ghost" size="sm" className="relative">
+        <Button variant="ghost" size="icon" className="relative h-9 w-9">
           <Bell className="w-4 h-4" />
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full"></span>
+          <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>
         </Button>
 
         <DropdownMenu>
