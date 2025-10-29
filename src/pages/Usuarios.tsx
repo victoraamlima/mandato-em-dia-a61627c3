@@ -3,21 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   Search,
@@ -31,6 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link } from "react-router-dom";
+import { ResponsiveTable, type Column } from "@/components/ui/responsive-table";
 
 type Usuario = Tables<"usuario">;
 
@@ -54,11 +48,55 @@ export default function Usuarios() {
     queryFn: () => fetchUsuarios(searchTerm),
   });
 
+  const ActionsDropdown = ({ item }: { item: Usuario }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm">
+          <MoreHorizontal className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link to={`/usuarios/${item.usuario_id}/editar`}>
+            <Edit className="w-4 h-4 mr-2" />
+            Editar
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const columns: Column<Usuario>[] = [
+    { header: "Nome", accessor: "nome", className: "font-medium" },
+    { header: "E-mail", accessor: "email" },
+    { header: "Perfil", accessor: (item) => <Badge variant="secondary">{item.perfil}</Badge> },
+    { header: "Status", accessor: (item) => <Badge variant={item.ativo ? "default" : "destructive"}>{item.ativo ? "Ativo" : "Inativo"}</Badge> },
+    { header: "", className: "w-[50px]", accessor: (item) => <ActionsDropdown item={item} /> },
+  ];
+
+  const renderMobileCard = (usuario: Usuario) => (
+    <div className="space-y-2">
+      <div className="flex justify-between items-start">
+        <p className="font-bold">{usuario.nome}</p>
+        <ActionsDropdown item={usuario} />
+      </div>
+      <div className="text-sm text-muted-foreground space-y-1">
+        <p>{usuario.email}</p>
+        <div className="flex gap-2">
+            <Badge variant="secondary">{usuario.perfil}</Badge>
+            <Badge variant={usuario.ativo ? "default" : "destructive"}>
+                {usuario.ativo ? "Ativo" : "Inativo"}
+            </Badge>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Usuários</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Usuários</h1>
           <p className="text-muted-foreground">Gerencie os usuários do sistema</p>
         </div>
         <DropdownMenu>
@@ -109,76 +147,15 @@ export default function Usuarios() {
         </CardContent>
       </Card>
 
-      <Card className="card-institutional">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-surface-hover border-border">
-                  <TableHead className="font-semibold">Nome</TableHead>
-                  <TableHead className="font-semibold">E-mail</TableHead>
-                  <TableHead className="font-semibold">Perfil</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      <span className="animate-pulse text-muted-foreground">Carregando...</span>
-                    </TableCell>
-                  </TableRow>
-                ) : isError ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-destructive">
-                      Erro ao carregar usuários.
-                    </TableCell>
-                  </TableRow>
-                ) : usuarios?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      Nenhum usuário encontrado.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  usuarios?.map((usuario) => (
-                    <TableRow key={usuario.usuario_id} className="hover:bg-surface-hover transition-colors">
-                      <TableCell className="font-medium">{usuario.nome}</TableCell>
-                      <TableCell>{usuario.email}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{usuario.perfil}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={usuario.ativo ? "default" : "destructive"}>
-                          {usuario.ativo ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link to={`/usuarios/${usuario.usuario_id}/editar`}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar
-                              </Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <ResponsiveTable
+        columns={columns}
+        data={usuarios ?? []}
+        rowKey="usuario_id"
+        isLoading={isLoading}
+        isError={isError}
+        renderMobileCard={renderMobileCard}
+        noResultsMessage="Nenhum usuário encontrado."
+      />
     </div>
   );
 }

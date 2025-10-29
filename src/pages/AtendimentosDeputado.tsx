@@ -102,9 +102,9 @@ export default function AtendimentosDeputado() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Atendimentos do Deputado</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Atendimentos do Deputado</h1>
           <p className="text-muted-foreground">Agenda dedicada aos atendimentos do deputado</p>
         </div>
         <Button className="bg-primary hover:bg-primary-hover" onClick={() => navigate("/atendimentos-deputado/novo")}>
@@ -128,7 +128,7 @@ export default function AtendimentosDeputado() {
             </div>
             <div>
               <select
-                className="border rounded px-2 py-1 text-sm h-10"
+                className="border rounded px-2 py-1 text-sm h-10 w-full sm:w-auto"
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
               >
