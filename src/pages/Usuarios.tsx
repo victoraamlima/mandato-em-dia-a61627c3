@@ -23,6 +23,8 @@ import {
   Plus,
   MoreHorizontal,
   Edit,
+  UserPlus,
+  Link2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -57,12 +59,28 @@ export default function Usuarios() {
           <h1 className="text-3xl font-bold text-foreground">Usuários</h1>
           <p className="text-muted-foreground">Gerencie os usuários do sistema</p>
         </div>
-        <Button className="bg-primary hover:bg-primary-hover" asChild>
-          <Link to="/usuarios/novo">
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Usuário
-          </Link>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="bg-primary hover:bg-primary-hover text-primary-foreground">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Usuário
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem asChild>
+              <Link to="/usuarios/novo" className="flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                Cadastro manual
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/usuarios/convites/novo" className="flex items-center gap-2">
+                <Link2 className="w-4 h-4" />
+                Gerar link de convite
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Card className="card-institutional">

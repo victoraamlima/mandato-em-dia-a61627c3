@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Bell, User, LogOut, Settings, Users as UsersIcon, Ticket as TicketIcon } from "lucide-react";
+import { Search, Plus, Bell, User, LogOut, Settings, Users as UsersIcon, Ticket as TicketIcon, CalendarDays } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -63,6 +63,12 @@ export function AppHeader() {
               <a href="/tickets/novo" className="flex items-center gap-2">
                 <TicketIcon className="w-4 h-4" />
                 Novo Atendimento
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/atendimentos-deputado/novo" className="flex items-center gap-2">
+                <CalendarDays className="w-4 h-4" />
+                Novo Atendimento Dep.
               </a>
             </DropdownMenuItem>
           </DropdownMenuContent>
