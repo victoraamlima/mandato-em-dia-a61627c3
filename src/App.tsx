@@ -29,6 +29,7 @@ import Financeiro from "./pages/Financeiro";
 import Cohab from "./pages/Cohab";
 import ConviteNovo from "./pages/ConviteNovo";
 import ConvitesList from "./pages/ConvitesList";
+import ConviteSignup from "./pages/ConviteSignup"; // página pública de cadastro via convite
 
 // Rotas do Módulo de Campo
 import CampoLogin from "./pages/campo/CampoLogin";
@@ -49,6 +50,7 @@ const App = () => (
           <Routes>
             {/* Rotas Públicas */}
             <Route path="/login" element={<Login />} />
+            <Route path="/convite/:token" element={<ConviteSignup />} />
             <Route path="/campo/login" element={<CampoLogin />} />
 
             {/* Rotas do Módulo de Campo */}
