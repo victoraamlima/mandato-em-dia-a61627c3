@@ -53,9 +53,9 @@ export function AppSidebar() {
       : "hover:bg-surface-hover text-muted-foreground hover:text-foreground";
 
   const getNavLinkClasses = (isActive: boolean) => `
-    flex items-center rounded-md text-sm transition-all duration-200 w-full
+    flex items-center rounded-md text-sm transition-all duration-200
     ${getNavClass({ isActive })}
-    ${isCollapsed ? 'justify-center p-3 mx-auto' : 'justify-start gap-3 px-3 py-2'}
+    ${isCollapsed ? 'justify-center w-10 h-10 mx-auto' : 'justify-start gap-3 px-3 py-2 w-full'}
   `;
 
   return (
@@ -82,7 +82,7 @@ export function AppSidebar() {
             Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-1 px-2">
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -107,7 +107,7 @@ export function AppSidebar() {
             Gestão
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-1 px-2">
               {managementItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
