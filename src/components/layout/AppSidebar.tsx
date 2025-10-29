@@ -62,7 +62,7 @@ export function AppSidebar() {
     <Sidebar className={isCollapsed ? "w-16" : "w-64"} collapsible="icon">
       <SidebarContent className="bg-surface border-r border-border">
         {/* Logo */}
-        <div className="h-16 flex items-center px-4 border-b border-border">
+        <div className={`h-16 flex items-center border-b border-border ${isCollapsed ? 'justify-center' : 'px-4'}`}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center">
               <Building2 className="w-5 h-5 text-primary-foreground" />
