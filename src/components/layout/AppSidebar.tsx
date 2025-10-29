@@ -53,9 +53,9 @@ export function AppSidebar() {
       : "hover:bg-surface-hover text-muted-foreground hover:text-foreground";
 
   const getNavLinkClasses = (isActive: boolean) => `
-    flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-200
+    flex items-center rounded-md text-sm transition-all duration-200 w-full
     ${getNavClass({ isActive })}
-    ${isCollapsed ? 'justify-center w-10 h-10 mx-auto' : 'justify-start'}
+    ${isCollapsed ? 'justify-center p-2' : 'justify-start gap-3 px-3 py-2'}
   `;
 
   return (
