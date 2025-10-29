@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
 import { Search, Plus, Bell, User, LogOut, Settings, Users as UsersIcon, Ticket as TicketIcon, CalendarDays, Menu } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +34,7 @@ export function AppHeader() {
   };
 
   return (
-    <header className="border-b border-border bg-surface h-16 flex items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-30 border-b border-border bg-surface h-16 flex items-center justify-between px-4 sm:px-6">
       <div className="flex items-center gap-4">
         {/* Gatilho da Sidebar para Desktop */}
         <SidebarTrigger className="hidden md:flex p-2 hover:bg-surface-hover rounded-md" />
@@ -47,6 +47,10 @@ export function AppHeader() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Menu Principal</SheetTitle>
+              <SheetDescription>Navegue pelas seções do sistema.</SheetDescription>
+            </SheetHeader>
             <SidebarNavigation onLinkClick={() => setIsMobileMenuOpen(false)} />
           </SheetContent>
         </Sheet>

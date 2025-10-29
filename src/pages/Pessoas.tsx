@@ -24,8 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { maskPhone, normalizeCPF } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ResponsiveTable } from "@/components/ui/responsive-table";
-import type { Column } from "@/components/ui/responsive-table";
+import { ResponsiveTable, type Column } from "@/components/ui/responsive-table";
 
 const PAGE_SIZE = 10;
 
@@ -198,17 +197,17 @@ export default function Pessoas() {
       <Card className="card-institutional">
         <CardHeader><CardTitle>Buscar e Filtrar</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input placeholder="Buscar por nome, CPF ou município..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10" />
             </div>
-            <div className="flex gap-2">
-              <select className="border rounded px-2 py-1 text-sm" value={municipioFilter} onChange={(e) => { setMunicipioFilter(e.target.value); setPage(1); }}>
+            <div className="flex flex-wrap gap-2">
+              <select className="border rounded px-2 py-1 text-sm h-10" value={municipioFilter} onChange={(e) => { setMunicipioFilter(e.target.value); setPage(1); }}>
                 <option value="">Município</option>
                 {municipios?.map((m) => (<option key={m.municipio} value={m.municipio}>{m.municipio}</option>))}
               </select>
-              <select className="border rounded px-2 py-1 text-sm" value={ufFilter} onChange={(e) => { setUfFilter(e.target.value); setPage(1); }}>
+              <select className="border rounded px-2 py-1 text-sm h-10" value={ufFilter} onChange={(e) => { setUfFilter(e.target.value); setPage(1); }}>
                 <option value="">UF</option>
                 {Array.from(new Set(municipios?.map((m) => m.uf))).map((uf) => (<option key={uf} value={uf}>{uf}</option>))}
               </select>

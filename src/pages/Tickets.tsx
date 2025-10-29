@@ -22,8 +22,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ResponsiveTable } from "@/components/ui/responsive-table";
-import type { Column } from "@/components/ui/responsive-table";
+import { ResponsiveTable, type Column } from "@/components/ui/responsive-table";
 
 const PAGE_SIZE = 10;
 
@@ -132,17 +131,17 @@ export default function Tickets() {
       <Card className="card-institutional">
         <CardHeader><CardTitle>Buscar e Filtrar</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input placeholder="Buscar por motivo, categoria ou descrição..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10" />
             </div>
-            <div className="flex gap-2">
-              <select className="border rounded px-2 py-1 text-sm" value={categoriaFilter} onChange={(e) => { setCategoriaFilter(e.target.value); setPage(1); }}>
+            <div className="flex flex-wrap gap-2">
+              <select className="border rounded px-2 py-1 text-sm h-10" value={categoriaFilter} onChange={(e) => { setCategoriaFilter(e.target.value); setPage(1); }}>
                 <option value="">Categoria</option>
                 {categorias?.map((c) => (<option key={c} value={c}>{c}</option>))}
               </select>
-              <select className="border rounded px-2 py-1 text-sm" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
+              <select className="border rounded px-2 py-1 text-sm h-10" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
                 <option value="">Status</option>
                 <option value="Aberto">Aberto</option>
                 <option value="Fechado">Fechado</option>
