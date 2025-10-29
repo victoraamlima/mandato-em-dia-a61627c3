@@ -71,14 +71,14 @@ export default function PessoaDetalhes() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <Button variant="outline" asChild>
           <Link to="/pessoas">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold text-foreground">{pessoa.nome}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground order-first sm:order-none text-center sm:text-left">{pessoa.nome}</h1>
         <Button asChild>
           <Link to={`/pessoas/${id}/editar`}>
             <Edit className="w-4 h-4 mr-2" />
@@ -139,32 +139,34 @@ export default function PessoaDetalhes() {
         <CardHeader><CardTitle className="flex items-center gap-2"><TicketIcon className="w-5 h-5 text-primary" /> Histórico de Atendimentos</CardTitle></CardHeader>
         <CardContent>
             {isLoadingTickets ? <p>Carregando atendimentos...</p> : (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Motivo</TableHead>
-                            <TableHead>Prioridade</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Data</TableHead>
-                            <TableHead></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {tickets?.map(ticket => (
-                            <TableRow key={ticket.ticket_id}>
-                                <TableCell>{ticket.motivo_atendimento}</TableCell>
-                                <TableCell><Badge variant={ticket.prioridade === 'Alta' ? 'destructive' : 'secondary'}>{ticket.prioridade}</Badge></TableCell>
-                                <TableCell><Badge>{ticket.status}</Badge></TableCell>
-                                <TableCell>{new Date(ticket.created_at).toLocaleDateString('pt-BR')}</TableCell>
-                                <TableCell>
-                                    <Button variant="ghost" size="sm" asChild>
-                                        <Link to={`/tickets/${ticket.ticket_id}`}>Ver</Link>
-                                    </Button>
-                                </TableCell>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Motivo</TableHead>
+                                <TableHead>Prioridade</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Data</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {tickets?.map(ticket => (
+                                <TableRow key={ticket.ticket_id}>
+                                    <TableCell>{ticket.motivo_atendimento}</TableCell>
+                                    <TableCell><Badge variant={ticket.prioridade === 'Alta' ? 'destructive' : 'secondary'}>{ticket.prioridade}</Badge></TableCell>
+                                    <TableCell><Badge>{ticket.status}</Badge></TableCell>
+                                    <TableCell>{new Date(ticket.created_at).toLocaleDateString('pt-BR')}</TableCell>
+                                    <TableCell>
+                                        <Button variant="ghost" size="sm" asChild>
+                                            <Link to={`/tickets/${ticket.ticket_id}`}>Ver</Link>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             )}
         </CardContent>
       </Card>
