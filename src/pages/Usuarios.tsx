@@ -17,6 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Search,
@@ -25,6 +26,7 @@ import {
   Edit,
   UserPlus,
   Link2,
+  List,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -77,6 +79,13 @@ export default function Usuarios() {
               <Link to="/usuarios/convites/novo" className="flex items-center gap-2">
                 <Link2 className="w-4 h-4" />
                 Gerar link de convite
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/usuarios/convites" className="flex items-center gap-2">
+                <List className="w-4 h-4" />
+                Gerenciar Convites
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
